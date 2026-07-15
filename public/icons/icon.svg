@@ -1,6 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#0F4C9D"/>
-  <circle cx="256" cy="256" r="150" fill="#ffffff"/>
-  <path d="M256 140l44 32-17 52h-54l-17-52z" fill="#0f172a"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#0f172a" stroke-width="16"/>
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#0F4C9D"/>
+  <!-- Pallone da calcio -->
+  <circle cx="256" cy="256" r="168" fill="#FFFFFF"/>
+  <g fill="none" stroke="#C4D6EC" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <polygon points="256,208 305,243 286,299 226,299 207,243"/>
+    <line x1="256" y1="208" x2="256" y2="96"/>
+    <line x1="305" y1="243" x2="410" y2="209"/>
+    <line x1="286" y1="299" x2="350" y2="388"/>
+    <line x1="226" y1="299" x2="162" y2="388"/>
+    <line x1="207" y1="243" x2="102" y2="209"/>
+  </g>
+  <!-- Marchio lexroom dentro il pallone -->
+  <g transform="translate(161 181) scale(9.4)" fill="#0F4C9D">
+    <path d="M16.8123 3.75483C16.483 3.75483 16.1675 3.624 15.9345 3.39134L15.9229 3.37974C15.6903 3.14707 15.5594 2.83127 15.5594 2.50193V0H0V12.2229H3.18768C3.51702 12.2229 3.8325 12.3537 4.06548 12.5864L4.07708 12.598C4.30974 12.8306 4.44058 13.1464 4.44058 13.4758V15.9777H20V3.75483H16.8123ZM5.6996 12.2229C5.37026 12.2229 5.05478 12.092 4.8218 11.8594L4.81052 11.8481C4.57786 11.6154 4.44702 11.2996 4.44702 10.9703V3.75483H14.3007C14.6301 3.75483 14.9455 3.88567 15.1785 4.11833L15.1898 4.12961C15.4225 4.36227 15.5533 4.67807 15.5533 5.00741V12.2229H5.6996Z"/>
+  </g>
 </svg>

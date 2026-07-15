@@ -24,7 +24,7 @@ async function withSharp() {
   await Promise.all(
     Object.entries(targets).map(async ([name, size]) => {
       const buf = await sharp(svg, { density: 384 })
-        .resize(size, size, { fit: 'contain', background: { r: 22, g: 163, b: 74, alpha: 1 } })
+        .resize(size, size, { fit: 'contain', background: { r: 15, g: 76, b: 157, alpha: 1 } })
         .png()
         .toBuffer();
       await writeFile(join(iconsDir, name), buf);
