@@ -447,6 +447,12 @@ export interface Database {
         };
         Returns: undefined;
       };
+      leave_team: {
+        Args: {
+          p_team_id: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       tournament_format: 'round_robin' | 'knockout' | 'groups_playoff' | 'league';

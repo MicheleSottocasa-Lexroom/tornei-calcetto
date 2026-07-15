@@ -12,7 +12,7 @@ import { TeamRegistrationForm } from '@/features/teams/TeamRegistrationForm';
 import { RosterEditor } from '@/features/teams/RosterEditor';
 import {
   useJoinTeam,
-  useRemoveTeamMember,
+  useLeaveTeam,
   useTeamParticipants,
   teamErrorMessage,
 } from '@/features/teams/hooks';
@@ -35,7 +35,7 @@ export default function RegistrationPage() {
   const { data: teams, isLoading: teamsLoading } = useTeams(id);
 
   const joinTeam = useJoinTeam(tournamentId);
-  const leaveTeam = useRemoveTeamMember(tournamentId);
+  const leaveTeam = useLeaveTeam();
   const { data: allParticipants } = useTeamParticipants(id);
 
   const registrationOpen = tournament?.status === 'registration_open';
@@ -175,17 +175,18 @@ export default function RegistrationPage() {
             </p>
           )}
 
-          {!isCaptain && registrationOpen && (
+          {!isCaptain && (
             <div className="mt-4 border-t border-border pt-3">
               <Button
                 variant="danger"
                 size="sm"
                 loading={leaveTeam.isPending}
                 onClick={() => {
-                  if (myMembership) leaveTeam.mutate(myMembership.id);
+                  if (!window.confirm(`Uscire da ${myTeam.name}?`)) return;
+                  leaveTeam.mutate({ teamId: myTeam.id });
                 }}
               >
-                Lascia la squadra
+                Esci dalla squadra
               </Button>
               {leaveTeam.isError && (
                 <p className="mt-2 text-sm text-destructive">

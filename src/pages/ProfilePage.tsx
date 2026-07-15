@@ -3,7 +3,12 @@ import { Link } from 'react-router-dom';
 import { Bell, ChevronRight, LogOut } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { useProfile } from '@/hooks/useProfile';
-import { useMyTeams, useUpdateProfile } from '@/features/teams/hooks';
+import {
+  useLeaveTeam,
+  useMyTeams,
+  useUpdateProfile,
+  teamErrorMessage,
+} from '@/features/teams/hooks';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
@@ -18,6 +23,7 @@ export default function ProfilePage() {
   const { user, isAdmin, signOut } = useSession();
   const { data: profile } = useProfile();
   const updateProfile = useUpdateProfile();
+  const leaveTeam = useLeaveTeam();
   const { data: myTeams, isLoading: teamsLoading } = useMyTeams();
 
   const [name, setName] = useState('');
@@ -111,51 +117,76 @@ export default function ProfilePage() {
             description="Non fai ancora parte di nessuna squadra."
           />
         ) : (
-          <ul className="space-y-2">
-            {myTeams.map((entry) => {
-              const inner = (
-                <>
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-foreground">
-                      {entry.team.name}
-                    </p>
-                    {entry.tournament && (
-                      <p className="truncate text-xs text-muted-foreground">
-                        {entry.tournament.name}
+          <>
+            <ul className="space-y-2">
+              {myTeams.map((entry) => {
+                const isCaptain = entry.membership.role === 'captain';
+                const inner = (
+                  <>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-foreground">
+                        {entry.team.name}
                       </p>
-                    )}
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <Badge
-                      tone={entry.membership.role === 'captain' ? 'primary' : 'default'}
-                    >
-                      {entry.membership.role === 'captain' ? 'Capitano' : 'Giocatore'}
-                    </Badge>
-                    {entry.tournament && (
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </div>
-                </>
-              );
-
-              return (
-                <li key={entry.membership.id}>
-                  {entry.tournament ? (
-                    <Link
-                      to={`/tornei/${entry.tournament.id}/squadre`}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 hover:bg-accent/60"
-                    >
-                      {inner}
-                    </Link>
-                  ) : (
-                    <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-                      {inner}
+                      {entry.tournament && (
+                        <p className="truncate text-xs text-muted-foreground">
+                          {entry.tournament.name}
+                        </p>
+                      )}
                     </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Badge tone={isCaptain ? 'primary' : 'default'}>
+                        {isCaptain ? 'Capitano' : 'Giocatore'}
+                      </Badge>
+                      {entry.tournament && (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </>
+                );
+
+                return (
+                  <li key={entry.membership.id} className="flex items-center gap-2">
+                    {entry.tournament ? (
+                      <Link
+                        to={`/tornei/${entry.tournament.id}/squadre`}
+                        className="flex flex-1 items-center justify-between gap-3 rounded-lg border border-border p-3 hover:bg-accent/60"
+                      >
+                        {inner}
+                      </Link>
+                    ) : (
+                      <div className="flex flex-1 items-center justify-between gap-3 rounded-lg border border-border p-3">
+                        {inner}
+                      </div>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="shrink-0 text-destructive"
+                      loading={
+                        leaveTeam.isPending &&
+                        leaveTeam.variables?.teamId === entry.team.id
+                      }
+                      onClick={() => {
+                        const msg = isCaptain
+                          ? `Sei il capitano di ${entry.team.name}. Se sei l'unico membro la squadra verrà eliminata; altrimenti dovrai prima passare la fascia. Continuare?`
+                          : `Uscire da ${entry.team.name}?`;
+                        if (!window.confirm(msg)) return;
+                        leaveTeam.mutate({ teamId: entry.team.id });
+                      }}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Esci
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+            {leaveTeam.isError && (
+              <p className="mt-3 text-sm text-destructive">
+                {teamErrorMessage(leaveTeam.error)}
+              </p>
+            )}
+          </>
         )}
       </Card>
 

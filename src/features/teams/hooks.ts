@@ -418,3 +418,23 @@ export function useClaimParticipant() {
     },
   });
 }
+
+/**
+ * Esce da una squadra: rimuove la membership e rilascia il claim del partecipante.
+ * Un capitano unico membro scioglie la squadra; con altri membri deve prima passare
+ * la fascia (l'RPC solleva un errore chiaro).
+ */
+export function useLeaveTeam() {
+  const queryClient = useQueryClient();
+  return useMutation<void, unknown, { teamId: string }>({
+    mutationFn: async ({ teamId }) => {
+      const { error } = await supabase.rpc('leave_team', { p_team_id: teamId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['my-teams'] });
+      void queryClient.invalidateQueries({ queryKey: ['pending-claims'] });
+      void queryClient.invalidateQueries({ queryKey: ['tournament'] });
+    },
+  });
+}
