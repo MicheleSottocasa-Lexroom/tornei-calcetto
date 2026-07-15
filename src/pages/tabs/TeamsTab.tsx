@@ -1,16 +1,28 @@
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { AlertTriangle, Users } from 'lucide-react';
-import { useTeams } from '@/hooks/queries';
+import { Link, useParams } from 'react-router-dom';
+import { AlertTriangle, UserPlus, Users } from 'lucide-react';
+import { useTeams, useTournament } from '@/hooks/queries';
 import { useTeamParticipants } from '@/features/teams/hooks';
-import { EmptyState, Spinner } from '@/components/ui';
+import { Button, EmptyState, Spinner } from '@/components/ui';
 import { TeamsList } from '@/features/tournaments/TeamsList';
 import type { TeamParticipant } from '@/types';
 
 export default function TeamsTab() {
   const { id } = useParams<{ id: string }>();
+  const { data: tournament } = useTournament(id);
   const { data, isLoading, error } = useTeams(id);
   const { data: participants } = useTeamParticipants(id);
+
+  const registrationOpen = tournament?.status === 'registration_open';
+
+  const registerCta = registrationOpen ? (
+    <Link to={`/tornei/${id}/iscrizione`} className="block">
+      <Button fullWidth>
+        <UserPlus className="h-4 w-4" />
+        Iscrivi la tua squadra
+      </Button>
+    </Link>
+  ) : null;
 
   const participantsByTeam = useMemo(() => {
     const map = new Map<string, TeamParticipant[]>();
@@ -42,13 +54,35 @@ export default function TeamsTab() {
 
   if (!data || data.length === 0) {
     return (
-      <EmptyState
-        icon={<Users className="h-10 w-10" />}
-        title="Nessuna squadra iscritta"
-        description="Le squadre iscritte compariranno qui."
-      />
+      <div className="space-y-4">
+        {registerCta}
+        <EmptyState
+          icon={<Users className="h-10 w-10" />}
+          title="Nessuna squadra iscritta"
+          description={
+            registrationOpen
+              ? 'Sii il primo: crea la tua squadra e iscriviti al torneo.'
+              : 'Le squadre iscritte compariranno qui.'
+          }
+          action={
+            registrationOpen ? (
+              <Link to={`/tornei/${id}/iscrizione`}>
+                <Button size="sm">
+                  <UserPlus className="h-4 w-4" />
+                  Crea la tua squadra
+                </Button>
+              </Link>
+            ) : undefined
+          }
+        />
+      </div>
     );
   }
 
-  return <TeamsList teams={data} participantsByTeam={participantsByTeam} />;
+  return (
+    <div className="space-y-4">
+      {registerCta}
+      <TeamsList teams={data} participantsByTeam={participantsByTeam} />
+    </div>
+  );
 }
