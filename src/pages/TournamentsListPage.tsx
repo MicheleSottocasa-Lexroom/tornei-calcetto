@@ -4,6 +4,7 @@ import { it } from 'date-fns/locale';
 import { AlertTriangle, Calendar, Trophy } from 'lucide-react';
 import { useTournaments } from '@/hooks/queries';
 import { Badge, Card, EmptyState, Spinner } from '@/components/ui';
+import { RefreshButton } from '@/components/RefreshButton';
 import type { BadgeProps } from '@/components/ui';
 import type { Tournament, TournamentFormat, TournamentStatus } from '@/types';
 
@@ -67,7 +68,10 @@ export default function TournamentsListPage() {
   if (tournaments.length === 0) {
     return (
       <section className="space-y-4">
-        <h1 className="text-xl font-bold text-foreground">Tornei</h1>
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-bold text-foreground">Tornei</h1>
+          <RefreshButton queryKeys={[['tournaments']]} />
+        </div>
         <EmptyState
           icon={<Trophy className="h-10 w-10" />}
           title="Nessun torneo"
@@ -82,7 +86,10 @@ export default function TournamentsListPage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-xl font-bold text-foreground">Tornei</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-xl font-bold text-foreground">Tornei</h1>
+        <RefreshButton queryKeys={[['tournaments']]} />
+      </div>
       {active.length > 0 && (
         <TournamentSection title="Attivi" tournaments={active} />
       )}

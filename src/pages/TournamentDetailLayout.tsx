@@ -8,6 +8,7 @@ import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { Spinner } from '@/components/ui/Spinner';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { RefreshButton } from '@/components/RefreshButton';
 import type { BadgeProps } from '@/components/ui';
 import type { TournamentFormat, TournamentStatus } from '@/types';
 
@@ -82,13 +83,16 @@ export default function TournamentDetailLayout() {
       ) : (
         <>
           <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold text-foreground">
-                {tournament.name}
-              </h1>
-              <Badge tone={STATUS_TONE[tournament.status]}>
-                {STATUS_LABELS[tournament.status] ?? tournament.status}
-              </Badge>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl font-bold text-foreground">
+                  {tournament.name}
+                </h1>
+                <Badge tone={STATUS_TONE[tournament.status]}>
+                  {STATUS_LABELS[tournament.status] ?? tournament.status}
+                </Badge>
+              </div>
+              <RefreshButton queryKeys={[['tournament', id]]} />
             </div>
             {tournament.description && (
               <p className="text-sm text-muted-foreground">{tournament.description}</p>
