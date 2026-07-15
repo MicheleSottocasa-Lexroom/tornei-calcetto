@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { MatchScheduler } from '@/features/admin/MatchScheduler';
+import { ManualMatchForm } from '@/features/admin/ManualMatchForm';
 import { FORMAT_LABELS } from '@/features/admin/TournamentForm';
 import {
   useAssignTeamToGroup,
@@ -90,6 +91,9 @@ export default function ManageSchedulePage() {
 
   const format = tournament.format;
   const hasMatches = (matches ?? []).length > 0;
+  const manual = Boolean(
+    (tournament.config as { manual_matches?: boolean } | null)?.manual_matches,
+  );
 
   return (
     <section className="space-y-4">
@@ -121,8 +125,17 @@ export default function ManageSchedulePage() {
         </Card>
       )}
 
-      {/* Generazione per formato */}
-      {(format === 'round_robin' || format === 'league') && (
+      {/* Gestione manuale: aggiunta partita al volo */}
+      {manual && (
+        <ManualMatchForm
+          tournamentId={tournament.id}
+          format={format}
+          teams={activeTeams}
+        />
+      )}
+
+      {/* Generazione automatica per formato (nascosta in gestione manuale) */}
+      {!manual && (format === 'round_robin' || format === 'league') && (
         <Card className="space-y-3">
           <p className="text-sm text-muted-foreground">
             Genera automaticamente tutte le giornate del{' '}
@@ -154,7 +167,7 @@ export default function ManageSchedulePage() {
         </Card>
       )}
 
-      {format === 'knockout' && (
+      {!manual && format === 'knockout' && (
         <Card className="space-y-3">
           <p className="text-sm text-muted-foreground">
             Genera il tabellone a eliminazione diretta (i bye vengono gestiti
@@ -186,7 +199,7 @@ export default function ManageSchedulePage() {
         </Card>
       )}
 
-      {format === 'groups_playoff' && (
+      {!manual && format === 'groups_playoff' && (
         <>
           {/* Creazione gironi */}
           <Card className="space-y-3">

@@ -34,6 +34,7 @@ const schema = z.object({
   advance_per_group: z.coerce.number().int().min(1).max(8),
   seeding: z.enum(['seeded', 'random']),
   third_place: z.boolean(),
+  manual_matches: z.boolean(),
 });
 
 export type TournamentFormValues = z.infer<typeof schema>;
@@ -68,6 +69,7 @@ const defaultFormValues: TournamentFormValues = {
   advance_per_group: 2,
   seeding: 'seeded',
   third_place: false,
+  manual_matches: false,
 };
 
 /** Converte una data ISO in valore per <input type="date"> (YYYY-MM-DD). */
@@ -83,6 +85,7 @@ export function formValuesToInput(v: TournamentFormValues): CreateTournamentInpu
     round_robin: { double_round: v.double_round },
     groups: { num_groups: v.num_groups, advance_per_group: v.advance_per_group },
     knockout: { seeding: v.seeding, legs: 1, third_place: v.third_place },
+    manual_matches: v.manual_matches,
   };
   return {
     name: v.name.trim(),
@@ -173,6 +176,22 @@ export function TournamentForm({
             ))}
           </Select>
         </FormField>
+
+        <label className="flex items-start gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            disabled={structureLocked}
+            className="mt-0.5 h-4 w-4 rounded border-border bg-background accent-primary disabled:opacity-60"
+            {...register('manual_matches')}
+          />
+          <span>
+            Gestione manuale delle partite
+            <span className="block text-xs font-normal text-muted-foreground">
+              Niente calendario generato: aggiungi tu le singole partite (e i punteggi)
+              al momento del gioco.
+            </span>
+          </span>
+        </label>
 
         <div className="grid grid-cols-2 gap-3">
           <FormField label="Inizio" htmlFor="starts_at">

@@ -22,6 +22,7 @@ function toFormDefaults(t: Tournament): Partial<TournamentFormValues> {
     round_robin?: { double_round?: boolean };
     groups?: { num_groups?: number; advance_per_group?: number };
     knockout?: { seeding?: 'seeded' | 'random'; third_place?: boolean };
+    manual_matches?: boolean;
   };
   return {
     name: t.name,
@@ -38,6 +39,7 @@ function toFormDefaults(t: Tournament): Partial<TournamentFormValues> {
     advance_per_group: c.groups?.advance_per_group ?? 2,
     seeding: c.knockout?.seeding ?? 'seeded',
     third_place: c.knockout?.third_place ?? false,
+    manual_matches: c.manual_matches ?? false,
   };
 }
 

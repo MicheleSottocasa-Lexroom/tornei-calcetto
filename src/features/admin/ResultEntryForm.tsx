@@ -242,7 +242,13 @@ export function ResultEntryForm({
 
       {/* Eventi */}
       <Card className="space-y-3">
-        <p className="text-sm font-semibold text-foreground">Eventi partita</p>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Eventi partita</p>
+          <p className="text-xs text-muted-foreground">
+            Facoltativi: puoi salvare anche solo il punteggio finale, senza indicare
+            chi e quando ha segnato.
+          </p>
+        </div>
 
         {events.length === 0 ? (
           <EmptyState

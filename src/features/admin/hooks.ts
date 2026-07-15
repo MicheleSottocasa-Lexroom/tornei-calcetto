@@ -15,6 +15,7 @@ import type {
   Match,
   MatchEvent,
   MatchEventType,
+  MatchStage,
   MatchStatus,
   Profile,
   Tournament,
@@ -31,6 +32,8 @@ export interface TournamentConfig {
   round_robin: { double_round: boolean };
   groups: { num_groups: number; advance_per_group: number };
   knockout: { seeding: 'seeded' | 'random'; legs: number; third_place: boolean };
+  /** Se true: niente calendario generato, le partite si aggiungono a mano. */
+  manual_matches: boolean;
 }
 
 export interface CreateTournamentInput {
@@ -203,6 +206,54 @@ export function useUpdateTournament() {
     onSuccess: (t) => {
       qc.invalidateQueries({ queryKey: ['tournaments'] });
       qc.invalidateQueries({ queryKey: ['tournament', t.id] });
+    },
+  });
+}
+
+export interface CreateMatchInput {
+  tournamentId: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  stage?: MatchStage;
+  round?: number;
+  homeScore?: number | null;
+  awayScore?: number | null;
+  scheduledAt?: string | null;
+  venue?: string | null;
+}
+
+/**
+ * Crea manualmente una singola partita (gestione manuale, senza calendario).
+ * Se sono presenti entrambi i punteggi la partita è già "conclusa" e conta in classifica.
+ */
+export function useCreateMatch() {
+  const qc = useQueryClient();
+  return useMutation<Match, Error, CreateMatchInput>({
+    mutationFn: async (input) => {
+      const bothScores = input.homeScore != null && input.awayScore != null;
+      const { data, error } = await supabase
+        .from('matches')
+        .insert({
+          tournament_id: input.tournamentId,
+          home_team_id: input.homeTeamId,
+          away_team_id: input.awayTeamId,
+          stage: input.stage ?? 'league',
+          round: input.round ?? 1,
+          home_score: input.homeScore ?? null,
+          away_score: input.awayScore ?? null,
+          status: bothScores ? 'finished' : 'scheduled',
+          scheduled_at: input.scheduledAt ?? null,
+          venue: input.venue ?? null,
+        })
+        .select('*')
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_m, { tournamentId }) => {
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'matches'] });
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'standings'] });
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'scorers'] });
     },
   });
 }
