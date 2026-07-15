@@ -453,6 +453,12 @@ export interface Database {
         };
         Returns: undefined;
       };
+      delete_tournament: {
+        Args: {
+          p_tournament_id: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       tournament_format: 'round_robin' | 'knockout' | 'groups_playoff' | 'league';

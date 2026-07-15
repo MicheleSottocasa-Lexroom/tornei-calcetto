@@ -210,6 +210,22 @@ export function useUpdateTournament() {
   });
 }
 
+/** Elimina un torneo e tutto il collegato (solo admin, via RPC delete_tournament). */
+export function useDeleteTournament() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string }>({
+    mutationFn: async ({ id }) => {
+      const { error } = await supabase.rpc('delete_tournament', {
+        p_tournament_id: id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tournaments'] });
+    },
+  });
+}
+
 export interface CreateMatchInput {
   tournamentId: string;
   homeTeamId: string;

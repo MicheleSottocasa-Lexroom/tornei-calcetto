@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Info, Lock } from 'lucide-react';
+import { ArrowLeft, Info, Lock, Trash2 } from 'lucide-react';
 import { useMatches, useTournament } from '@/hooks/queries';
 import {
+  useDeleteTournament,
   useUpdateTournament,
   type UpdateTournamentInput,
 } from '@/features/admin/hooks';
@@ -10,6 +11,7 @@ import {
   TournamentForm,
   type TournamentFormValues,
 } from '@/features/admin/TournamentForm';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -49,6 +51,7 @@ export default function EditTournamentPage() {
   const { data: tournament, isLoading, error } = useTournament(id);
   const { data: matches } = useMatches(id);
   const update = useUpdateTournament();
+  const del = useDeleteTournament();
   const [saveError, setSaveError] = useState<string | null>(null);
 
   if (isLoading) {
@@ -132,6 +135,34 @@ export default function EditTournamentPage() {
           });
         }}
       />
+
+      <Card className="space-y-3 border-destructive/40">
+        <p className="text-sm font-semibold text-destructive">Zona pericolosa</p>
+        <p className="text-sm text-muted-foreground">
+          Eliminare il torneo rimuove definitivamente squadre, partecipanti, calendario,
+          risultati e marcatori. L&apos;azione non è reversibile.
+        </p>
+        <Button
+          variant="danger"
+          loading={del.isPending}
+          onClick={() => {
+            const ok = window.confirm(
+              `Eliminare definitivamente "${tournament.name}"? Verranno rimossi squadre, partecipanti, calendario, risultati e marcatori. L'azione non è reversibile.`,
+            );
+            if (!ok) return;
+            del.mutate(
+              { id: tournament.id },
+              {
+                onSuccess: () => navigate('/admin'),
+                onError: (e) => setSaveError(e.message),
+              },
+            );
+          }}
+        >
+          <Trash2 className="h-4 w-4" />
+          Elimina torneo
+        </Button>
+      </Card>
     </section>
   );
 }
