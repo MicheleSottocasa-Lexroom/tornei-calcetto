@@ -1,12 +1,14 @@
 import { Outlet, useParams, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { ArrowLeft, Calendar, Pencil } from 'lucide-react';
 import { useTournament } from '@/hooks/queries';
 import { useRealtimeTournament } from '@/hooks/useRealtimeTournament';
+import { useSession } from '@/hooks/useSession';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { Spinner } from '@/components/ui/Spinner';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { RefreshButton } from '@/components/RefreshButton';
 import type { BadgeProps } from '@/components/ui';
@@ -39,6 +41,7 @@ const FORMAT_LABELS: Record<TournamentFormat, string> = {
 
 export default function TournamentDetailLayout() {
   const { id } = useParams<{ id: string }>();
+  const { isAdmin } = useSession();
   const { data: tournament, isLoading, error } = useTournament(id);
 
   // Aggiornamenti live di partite/eventi per questo torneo.
@@ -92,7 +95,17 @@ export default function TournamentDetailLayout() {
                   {STATUS_LABELS[tournament.status] ?? tournament.status}
                 </Badge>
               </div>
-              <RefreshButton queryKeys={[['tournament', id]]} />
+              <div className="flex shrink-0 items-center gap-2">
+                {isAdmin && (
+                  <Link to={`/admin/tornei/${id}/modifica`}>
+                    <Button variant="secondary" size="sm">
+                      <Pencil className="h-4 w-4" />
+                      Modifica
+                    </Button>
+                  </Link>
+                )}
+                <RefreshButton queryKeys={[['tournament', id]]} />
+              </div>
             </div>
             {tournament.description && (
               <p className="text-sm text-muted-foreground">{tournament.description}</p>

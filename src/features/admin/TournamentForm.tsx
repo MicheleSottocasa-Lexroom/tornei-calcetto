@@ -99,6 +99,8 @@ export interface TournamentFormProps {
   defaultValues?: Partial<TournamentFormValues>;
   submitLabel?: string;
   loading?: boolean;
+  /** Se true, blocca formato e configurazione (calendario già generato / torneo avviato). */
+  structureLocked?: boolean;
   onSubmit: (input: CreateTournamentInput) => void;
 }
 
@@ -106,6 +108,7 @@ export function TournamentForm({
   defaultValues,
   submitLabel = 'Crea torneo',
   loading = false,
+  structureLocked = false,
   onSubmit,
 }: TournamentFormProps) {
   const {
@@ -152,8 +155,17 @@ export function TournamentForm({
           />
         </FormField>
 
-        <FormField label="Formato" htmlFor="format" required>
-          <Select id="format" {...register('format')}>
+        <FormField
+          label="Formato"
+          htmlFor="format"
+          required
+          hint={
+            structureLocked
+              ? 'Formato e configurazione bloccati: il calendario è già stato generato.'
+              : undefined
+          }
+        >
+          <Select id="format" disabled={structureLocked} {...register('format')}>
             {(Object.keys(FORMAT_LABELS) as TournamentFormat[]).map((f) => (
               <option key={f} value={f}>
                 {FORMAT_LABELS[f]}
@@ -184,7 +196,7 @@ export function TournamentForm({
 
       <Card className="space-y-4">
         <p className="text-sm font-semibold text-foreground">Punti classifica</p>
-        <div className="grid grid-cols-3 gap-3">
+        <fieldset disabled={structureLocked} className="grid grid-cols-3 gap-3 border-0 p-0">
           <FormField label="Vittoria" htmlFor="points_win">
             <Input id="points_win" type="number" min={0} max={10} {...register('points_win')} />
           </FormField>
@@ -194,73 +206,75 @@ export function TournamentForm({
           <FormField label="Sconfitta" htmlFor="points_loss">
             <Input id="points_loss" type="number" min={0} max={10} {...register('points_loss')} />
           </FormField>
-        </div>
+        </fieldset>
       </Card>
 
       {(showDoubleRound || showGroups || showKnockout) && (
         <Card className="space-y-4">
           <p className="text-sm font-semibold text-foreground">Opzioni formato</p>
 
-          {showDoubleRound && (
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-border bg-background accent-primary-600"
-                {...register('double_round')}
-              />
-              Andata e ritorno (doppio girone)
-            </label>
-          )}
-
-          {showGroups && (
-            <div className="grid grid-cols-2 gap-3">
-              <FormField
-                label="Numero gironi"
-                htmlFor="num_groups"
-                error={errors.num_groups?.message}
-              >
-                <Input
-                  id="num_groups"
-                  type="number"
-                  min={2}
-                  max={16}
-                  {...register('num_groups')}
-                />
-              </FormField>
-              <FormField
-                label="Qualificate per girone"
-                htmlFor="advance_per_group"
-                error={errors.advance_per_group?.message}
-              >
-                <Input
-                  id="advance_per_group"
-                  type="number"
-                  min={1}
-                  max={8}
-                  {...register('advance_per_group')}
-                />
-              </FormField>
-            </div>
-          )}
-
-          {showKnockout && (
-            <>
-              <FormField label="Sorteggio tabellone" htmlFor="seeding">
-                <Select id="seeding" {...register('seeding')}>
-                  <option value="seeded">Teste di serie (per seed)</option>
-                  <option value="random">Casuale</option>
-                </Select>
-              </FormField>
+          <fieldset disabled={structureLocked} className="space-y-4 border-0 p-0">
+            {showDoubleRound && (
               <label className="flex items-center gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-border bg-background accent-primary-600"
-                  {...register('third_place')}
+                  className="h-4 w-4 rounded border-border bg-background accent-primary"
+                  {...register('double_round')}
                 />
-                Finale 3°/4° posto
+                Andata e ritorno (doppio girone)
               </label>
-            </>
-          )}
+            )}
+
+            {showGroups && (
+              <div className="grid grid-cols-2 gap-3">
+                <FormField
+                  label="Numero gironi"
+                  htmlFor="num_groups"
+                  error={errors.num_groups?.message}
+                >
+                  <Input
+                    id="num_groups"
+                    type="number"
+                    min={2}
+                    max={16}
+                    {...register('num_groups')}
+                  />
+                </FormField>
+                <FormField
+                  label="Qualificate per girone"
+                  htmlFor="advance_per_group"
+                  error={errors.advance_per_group?.message}
+                >
+                  <Input
+                    id="advance_per_group"
+                    type="number"
+                    min={1}
+                    max={8}
+                    {...register('advance_per_group')}
+                  />
+                </FormField>
+              </div>
+            )}
+
+            {showKnockout && (
+              <>
+                <FormField label="Sorteggio tabellone" htmlFor="seeding">
+                  <Select id="seeding" {...register('seeding')}>
+                    <option value="seeded">Teste di serie (per seed)</option>
+                    <option value="random">Casuale</option>
+                  </Select>
+                </FormField>
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-border bg-background accent-primary"
+                    {...register('third_place')}
+                  />
+                  Finale 3°/4° posto
+                </label>
+              </>
+            )}
+          </fieldset>
         </Card>
       )}
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CalendarDays, ClipboardList, Plus, Trophy, Users } from 'lucide-react';
+import { CalendarDays, ClipboardList, Pencil, Plus, Trophy, Users } from 'lucide-react';
 import { useTournaments } from '@/hooks/queries';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -79,6 +79,13 @@ function TournamentRow({ tournament }: { tournament: Tournament }) {
           </Button>
         </Link>
       </div>
+
+      <Link to={`/admin/tornei/${tournament.id}/modifica`}>
+        <Button variant="ghost" size="sm" fullWidth>
+          <Pencil className="h-4 w-4" />
+          Modifica dettagli
+        </Button>
+      </Link>
     </Card>
   );
 }

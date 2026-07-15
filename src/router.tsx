@@ -19,6 +19,7 @@ import NotFoundPage from '@/pages/NotFoundPage';
 
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import NewTournamentPage from '@/pages/admin/NewTournamentPage';
+import EditTournamentPage from '@/pages/admin/EditTournamentPage';
 import ManageSchedulePage from '@/pages/admin/ManageSchedulePage';
 import ResultsEntryPage from '@/pages/admin/ResultsEntryPage';
 import AdminTeamsPage from '@/pages/admin/AdminTeamsPage';
@@ -57,6 +58,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <AdminDashboardPage /> },
               { path: 'tornei/nuovo', element: <NewTournamentPage /> },
+              { path: 'tornei/:id/modifica', element: <EditTournamentPage /> },
               { path: 'tornei/:id/calendario', element: <ManageSchedulePage /> },
               { path: 'tornei/:id/risultati', element: <ResultsEntryPage /> },
               { path: 'squadre', element: <AdminTeamsPage /> },
