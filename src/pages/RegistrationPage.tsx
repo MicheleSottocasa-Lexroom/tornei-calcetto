@@ -13,6 +13,7 @@ import { RosterEditor } from '@/features/teams/RosterEditor';
 import {
   useJoinTeam,
   useRemoveTeamMember,
+  useTeamParticipants,
   teamErrorMessage,
 } from '@/features/teams/hooks';
 import type { TournamentStatus } from '@/types';
@@ -35,6 +36,7 @@ export default function RegistrationPage() {
 
   const joinTeam = useJoinTeam(tournamentId);
   const leaveTeam = useRemoveTeamMember(tournamentId);
+  const { data: allParticipants } = useTeamParticipants(id);
 
   const registrationOpen = tournament?.status === 'registration_open';
 
@@ -48,6 +50,11 @@ export default function RegistrationPage() {
     }
     return { myTeam: undefined, myMembership: undefined };
   }, [teams, user]);
+
+  const myParticipants = useMemo(
+    () => (allParticipants ?? []).filter((p) => myTeam && p.team_id === myTeam.id),
+    [allParticipants, myTeam],
+  );
 
   const takenProfileIds = useMemo(() => {
     const set = new Set<string>();
@@ -133,6 +140,27 @@ export default function RegistrationPage() {
           </CardHeader>
 
           <p className="mb-3 text-lg font-semibold text-foreground">{myTeam.name}</p>
+
+          {myParticipants.length > 0 && (
+            <div className="mb-4 space-y-2">
+              <p className="text-sm font-medium text-foreground">Partecipanti</p>
+              <ul className="space-y-1.5">
+                {myParticipants.map((p) => (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm"
+                  >
+                    <span className="min-w-0 truncate text-foreground">{p.full_name}</span>
+                    {p.profile_id ? (
+                      <Badge tone="success">Associato</Badge>
+                    ) : (
+                      <Badge tone="default">In attesa</Badge>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <RosterEditor
             team={myTeam}

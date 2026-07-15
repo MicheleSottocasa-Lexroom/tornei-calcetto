@@ -1,7 +1,7 @@
 import { Avatar, Badge, Card } from '@/components/ui';
 import type { BadgeProps } from '@/components/ui';
 import { cn } from '@/lib/cn';
-import type { TeamStatus, TeamWithMembers } from '@/types';
+import type { TeamParticipant, TeamStatus, TeamWithMembers } from '@/types';
 
 type Tone = NonNullable<BadgeProps['tone']>;
 type Member = TeamWithMembers['members'][number];
@@ -14,16 +14,22 @@ const STATUS_META: Record<TeamStatus, { label: string; tone: Tone }> = {
 
 export interface TeamsListProps {
   teams: TeamWithMembers[];
+  /** Partecipanti (nomi liberi) per squadra: se presenti, sono la rosa mostrata. */
+  participantsByTeam?: Map<string, TeamParticipant[]>;
 }
 
-/** Elenco squadre del torneo con la relativa rosa. */
-export function TeamsList({ teams }: TeamsListProps) {
+/** Elenco squadre del torneo con la relativa rosa (partecipanti o membri). */
+export function TeamsList({ teams, participantsByTeam }: TeamsListProps) {
   return (
     <div className="space-y-3">
       {teams.map((team) => {
         const meta = STATUS_META[team.status];
         const withdrawn = team.status === 'withdrawn';
+        const participants = participantsByTeam?.get(team.id) ?? [];
+        const useParticipants = participants.length > 0;
         const members = [...team.members].sort(sortMembers);
+        const count = useParticipants ? participants.length : members.length;
+
         return (
           <Card key={team.id} className={cn(withdrawn && 'opacity-60')}>
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -32,14 +38,32 @@ export function TeamsList({ teams }: TeamsListProps) {
                   {team.name}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  {members.length}{' '}
-                  {members.length === 1 ? 'giocatore' : 'giocatori'}
+                  {count} {count === 1 ? 'partecipante' : 'partecipanti'}
                 </p>
               </div>
               <Badge tone={meta.tone}>{meta.label}</Badge>
             </div>
-            {members.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nessun giocatore in rosa.</p>
+
+            {count === 0 ? (
+              <p className="text-sm text-muted-foreground">Nessun partecipante in rosa.</p>
+            ) : useParticipants ? (
+              <ul className="space-y-2">
+                {participants.map((p) => {
+                  const isCaptain = !!p.profile_id && p.profile_id === team.captain_id;
+                  return (
+                    <li key={p.id} className="flex items-center gap-3">
+                      <Avatar name={p.full_name} size="sm" />
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <span className="truncate text-sm text-foreground">
+                          {p.full_name}
+                        </span>
+                        {isCaptain && <Badge tone="primary">Capitano</Badge>}
+                        {!p.profile_id && <Badge tone="default">In attesa</Badge>}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             ) : (
               <ul className="space-y-2">
                 {members.map((m) => {
@@ -47,19 +71,13 @@ export function TeamsList({ teams }: TeamsListProps) {
                     m.profile?.full_name ?? m.profile?.email ?? 'Giocatore';
                   return (
                     <li key={m.id} className="flex items-center gap-3">
-                      <Avatar
-                        src={m.profile?.avatar_url}
-                        name={displayName}
-                        size="sm"
-                      />
+                      <Avatar src={m.profile?.avatar_url} name={displayName} size="sm" />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="truncate text-sm text-foreground">
                             {displayName}
                           </span>
-                          {m.role === 'captain' && (
-                            <Badge tone="primary">Capitano</Badge>
-                          )}
+                          {m.role === 'captain' && <Badge tone="primary">Capitano</Badge>}
                         </div>
                       </div>
                       {m.shirt_number != null && (

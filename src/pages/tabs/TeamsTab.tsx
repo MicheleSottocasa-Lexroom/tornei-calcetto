@@ -1,12 +1,26 @@
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { AlertTriangle, Users } from 'lucide-react';
 import { useTeams } from '@/hooks/queries';
+import { useTeamParticipants } from '@/features/teams/hooks';
 import { EmptyState, Spinner } from '@/components/ui';
 import { TeamsList } from '@/features/tournaments/TeamsList';
+import type { TeamParticipant } from '@/types';
 
 export default function TeamsTab() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, error } = useTeams(id);
+  const { data: participants } = useTeamParticipants(id);
+
+  const participantsByTeam = useMemo(() => {
+    const map = new Map<string, TeamParticipant[]>();
+    for (const p of participants ?? []) {
+      const arr = map.get(p.team_id) ?? [];
+      arr.push(p);
+      map.set(p.team_id, arr);
+    }
+    return map;
+  }, [participants]);
 
   if (isLoading) {
     return (
@@ -36,5 +50,5 @@ export default function TeamsTab() {
     );
   }
 
-  return <TeamsList teams={data} />;
+  return <TeamsList teams={data} participantsByTeam={participantsByTeam} />;
 }

@@ -351,6 +351,39 @@ export interface Database {
         };
         Relationships: [];
       };
+      team_participants: {
+        Row: {
+          id: string;
+          team_id: string;
+          tournament_id: string;
+          full_name: string;
+          email: string | null;
+          profile_id: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          tournament_id?: string;
+          full_name: string;
+          email?: string | null;
+          profile_id?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          tournament_id?: string;
+          full_name?: string;
+          email?: string | null;
+          profile_id?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       standings_ranked: {
@@ -405,6 +438,12 @@ export interface Database {
       generate_playoff: {
         Args: {
           p_tournament_id: string;
+        };
+        Returns: undefined;
+      };
+      claim_team_participant: {
+        Args: {
+          p_participant_id: string;
         };
         Returns: undefined;
       };

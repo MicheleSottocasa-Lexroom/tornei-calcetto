@@ -8,6 +8,7 @@ import type {
   TeamInsert,
   TeamMember,
   TeamMemberInsert,
+  TeamParticipant,
   Tournament,
 } from '@/types';
 
@@ -41,22 +42,31 @@ export function teamErrorMessage(error: unknown): string {
 /* Mutation                                                                    */
 /* -------------------------------------------------------------------------- */
 
+export interface ParticipantInput {
+  full_name: string;
+  email?: string | null;
+}
+
 export interface CreateTeamInput {
   name: string;
   /** Numero di maglia del capitano (opzionale). */
   shirtNumber?: number | null;
+  /** Partecipanti (max 3). Il primo è il capitano (l'utente stesso). */
+  participants: ParticipantInput[];
 }
 
 /**
  * Crea una nuova squadra: l'utente diventa `created_by` e `captain_id`,
- * poi viene inserito nella rosa come `captain`.
+ * viene inserito nella rosa come `captain` e vengono registrati i partecipanti
+ * (nomi liberi + email facoltativa). Il primo partecipante è il capitano
+ * (auto-associato); gli altri restano da reclamare al login.
  */
 export function useCreateTeam(tournamentId: string) {
   const queryClient = useQueryClient();
   const { user } = useSession();
 
   return useMutation<Team, unknown, CreateTeamInput>({
-    mutationFn: async ({ name, shirtNumber }) => {
+    mutationFn: async ({ name, shirtNumber, participants }) => {
       if (!user) throw new Error('Devi accedere per creare una squadra.');
 
       const { data: team, error: teamError } = await supabase
@@ -78,16 +88,43 @@ export function useCreateTeam(tournamentId: string) {
         shirt_number: shirtNumber ?? null,
       } satisfies TeamMemberInsert);
       if (memberError) {
-        // Rollback best-effort della squadra orfana (potrebbe fallire per RLS,
-        // in tal caso resterà da ripulire lato admin).
         await supabase.from('teams').delete().eq('id', team.id);
         throw memberError;
+      }
+
+      const captainEmail = user.email?.toLowerCase() ?? null;
+      const rows = participants
+        .map((p, i) => ({ p, i }))
+        .filter(({ p }) => p.full_name.trim().length > 0)
+        .map(({ p, i }) => {
+          const email = p.email?.trim() ? p.email.trim().toLowerCase() : null;
+          const isCaptain = i === 0 || (!!captainEmail && email === captainEmail);
+          return {
+            team_id: team.id,
+            tournament_id: tournamentId,
+            full_name: p.full_name.trim(),
+            email,
+            profile_id: isCaptain ? user.id : null,
+            created_by: user.id,
+          };
+        });
+
+      if (rows.length > 0) {
+        const { error: partError } = await supabase.from('team_participants').insert(rows);
+        if (partError) {
+          // Rollback: elimina la squadra (cascade su membri e partecipanti).
+          await supabase.from('teams').delete().eq('id', team.id);
+          throw partError;
+        }
       }
 
       return team as Team;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: teamsKey(tournamentId) });
+      void queryClient.invalidateQueries({
+        queryKey: ['tournament', tournamentId, 'participants'],
+      });
     },
   });
 }
@@ -265,6 +302,119 @@ export function useMyTeams() {
           } satisfies MyTeamEntry;
         })
         .filter((entry): entry is MyTeamEntry => entry !== null);
+    },
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Partecipanti squadra + claim al login                                       */
+/* -------------------------------------------------------------------------- */
+
+/** Partecipanti (nomi liberi) di tutte le squadre di un torneo. */
+export function useTeamParticipants(tournamentId: string | undefined) {
+  return useQuery<TeamParticipant[]>({
+    queryKey: ['tournament', tournamentId, 'participants'],
+    enabled: !!tournamentId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('team_participants')
+        .select('*')
+        .eq('tournament_id', tournamentId!)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export interface PendingClaim {
+  participant: TeamParticipant;
+  teamName: string;
+  tournamentName: string;
+}
+
+/**
+ * Partecipanti non ancora associati che corrispondono al nome/cognome o
+ * all'email dell'utente autenticato (da proporre come "claim" al login).
+ */
+export function usePendingClaims() {
+  const { user, profile } = useSession();
+  const email = user?.email?.toLowerCase() ?? null;
+  const name = profile?.full_name?.trim() ?? null;
+
+  return useQuery<PendingClaim[]>({
+    queryKey: ['pending-claims', user?.id, name],
+    enabled: !!user,
+    queryFn: async () => {
+      const byId = new Map<string, TeamParticipant>();
+
+      if (email) {
+        const { data, error } = await supabase
+          .from('team_participants')
+          .select('*')
+          .is('profile_id', null)
+          .ilike('email', email);
+        if (error) throw error;
+        for (const p of data ?? []) byId.set(p.id, p);
+      }
+      if (name) {
+        const { data, error } = await supabase
+          .from('team_participants')
+          .select('*')
+          .is('profile_id', null)
+          .ilike('full_name', name);
+        if (error) throw error;
+        for (const p of data ?? []) byId.set(p.id, p);
+      }
+
+      const participants = [...byId.values()];
+      if (participants.length === 0) return [];
+
+      const teamIds = [...new Set(participants.map((p) => p.team_id))];
+      const { data: teams } = await supabase
+        .from('teams')
+        .select('id, name, tournament_id')
+        .in('id', teamIds);
+      const teamsById = new Map((teams ?? []).map((t) => [t.id, t]));
+
+      const tournamentIds = [...new Set((teams ?? []).map((t) => t.tournament_id))];
+      let tournamentsById = new Map<string, { id: string; name: string }>();
+      if (tournamentIds.length > 0) {
+        const { data: tournaments } = await supabase
+          .from('tournaments')
+          .select('id, name')
+          .in('id', tournamentIds);
+        tournamentsById = new Map((tournaments ?? []).map((t) => [t.id, t]));
+      }
+
+      return participants.map((participant) => {
+        const team = teamsById.get(participant.team_id);
+        return {
+          participant,
+          teamName: team?.name ?? 'Squadra',
+          tournamentName: team
+            ? tournamentsById.get(team.tournament_id)?.name ?? ''
+            : '',
+        } satisfies PendingClaim;
+      });
+    },
+  });
+}
+
+/** Reclama un partecipante: associa la squadra al profilo dell'utente. */
+export function useClaimParticipant() {
+  const queryClient = useQueryClient();
+  return useMutation<void, unknown, string>({
+    mutationFn: async (participantId) => {
+      const { error } = await supabase.rpc('claim_team_participant', {
+        p_participant_id: participantId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['pending-claims'] });
+      void queryClient.invalidateQueries({ queryKey: ['my-teams'] });
+      void queryClient.invalidateQueries({ queryKey: ['tournament'] });
     },
   });
 }
