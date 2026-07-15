@@ -19,7 +19,7 @@ export default function ScorersTab() {
   if (error) {
     return (
       <EmptyState
-        icon={<AlertTriangle className="h-10 w-10 text-red-400" />}
+        icon={<AlertTriangle className="h-10 w-10 text-destructive" />}
         title="Errore di caricamento"
         description="Impossibile caricare i marcatori. Riprova più tardi."
       />

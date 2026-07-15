@@ -183,7 +183,7 @@ export function TournamentForm({
       </Card>
 
       <Card className="space-y-4">
-        <p className="text-sm font-semibold text-surface-200">Punti classifica</p>
+        <p className="text-sm font-semibold text-foreground">Punti classifica</p>
         <div className="grid grid-cols-3 gap-3">
           <FormField label="Vittoria" htmlFor="points_win">
             <Input id="points_win" type="number" min={0} max={10} {...register('points_win')} />
@@ -199,13 +199,13 @@ export function TournamentForm({
 
       {(showDoubleRound || showGroups || showKnockout) && (
         <Card className="space-y-4">
-          <p className="text-sm font-semibold text-surface-200">Opzioni formato</p>
+          <p className="text-sm font-semibold text-foreground">Opzioni formato</p>
 
           {showDoubleRound && (
-            <label className="flex items-center gap-2 text-sm text-surface-200">
+            <label className="flex items-center gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-surface-600 bg-surface-900 accent-primary-600"
+                className="h-4 w-4 rounded border-border bg-background accent-primary-600"
                 {...register('double_round')}
               />
               Andata e ritorno (doppio girone)
@@ -251,10 +251,10 @@ export function TournamentForm({
                   <option value="random">Casuale</option>
                 </Select>
               </FormField>
-              <label className="flex items-center gap-2 text-sm text-surface-200">
+              <label className="flex items-center gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-surface-600 bg-surface-900 accent-primary-600"
+                  className="h-4 w-4 rounded border-border bg-background accent-primary-600"
                   {...register('third_place')}
                 />
                 Finale 3°/4° posto

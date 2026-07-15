@@ -96,7 +96,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           options: {
             redirectTo: window.location.origin,
             queryParams: {
-              hd: 'lexroom.ai',
               prompt: 'select_account',
             },
           },

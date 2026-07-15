@@ -28,10 +28,10 @@ export function TeamsList({ teams }: TeamsListProps) {
           <Card key={team.id} className={cn(withdrawn && 'opacity-60')}>
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <h3 className="truncate text-base font-semibold text-surface-100">
+                <h3 className="truncate text-base font-semibold text-foreground">
                   {team.name}
                 </h3>
-                <p className="text-xs text-surface-400">
+                <p className="text-xs text-muted-foreground">
                   {members.length}{' '}
                   {members.length === 1 ? 'giocatore' : 'giocatori'}
                 </p>
@@ -39,7 +39,7 @@ export function TeamsList({ teams }: TeamsListProps) {
               <Badge tone={meta.tone}>{meta.label}</Badge>
             </div>
             {members.length === 0 ? (
-              <p className="text-sm text-surface-500">Nessun giocatore in rosa.</p>
+              <p className="text-sm text-muted-foreground">Nessun giocatore in rosa.</p>
             ) : (
               <ul className="space-y-2">
                 {members.map((m) => {
@@ -54,7 +54,7 @@ export function TeamsList({ teams }: TeamsListProps) {
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="truncate text-sm text-surface-100">
+                          <span className="truncate text-sm text-foreground">
                             {displayName}
                           </span>
                           {m.role === 'captain' && (
@@ -63,7 +63,7 @@ export function TeamsList({ teams }: TeamsListProps) {
                         </div>
                       </div>
                       {m.shirt_number != null && (
-                        <span className="shrink-0 text-sm font-semibold text-surface-400">
+                        <span className="shrink-0 text-sm font-semibold text-muted-foreground">
                           #{m.shirt_number}
                         </span>
                       )}

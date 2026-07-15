@@ -8,15 +8,15 @@ export interface ScorersTableProps {
 /** Classifica marcatori: gol, assist e cartellini per giocatore. */
 export function ScorersTable({ scorers }: ScorersTableProps) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-surface-800">
+    <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full min-w-[440px] border-collapse text-sm">
         <thead>
-          <tr className="bg-surface-800/60 text-xs uppercase text-surface-400">
+          <tr className="bg-card/60 text-xs uppercase text-muted-foreground">
             <th className="px-2 py-2 text-center font-medium">#</th>
             <th className="px-2 py-2 text-left font-medium">Giocatore</th>
             <th
               title="Gol"
-              className="px-2 py-2 text-center font-semibold text-surface-200"
+              className="px-2 py-2 text-center font-semibold text-foreground"
             >
               Gol
             </th>
@@ -33,31 +33,31 @@ export function ScorersTable({ scorers }: ScorersTableProps) {
         </thead>
         <tbody>
           {scorers.map((s, i) => (
-            <tr key={s.player_id} className="border-t border-surface-800">
-              <td className="px-2 py-2 text-center text-surface-400">{i + 1}</td>
+            <tr key={s.player_id} className="border-t border-border">
+              <td className="px-2 py-2 text-center text-muted-foreground">{i + 1}</td>
               <td className="px-2 py-2">
                 <div className="flex items-center gap-2">
                   <Avatar name={s.player_name} size="sm" />
                   <div className="min-w-0">
-                    <div className="truncate font-medium text-surface-100">
+                    <div className="truncate font-medium text-foreground">
                       {s.player_name ?? 'Giocatore'}
                     </div>
                     {s.team_name && (
-                      <div className="truncate text-xs text-surface-400">
+                      <div className="truncate text-xs text-muted-foreground">
                         {s.team_name}
                       </div>
                     )}
                   </div>
                 </div>
               </td>
-              <td className="px-2 py-2 text-center text-base font-bold text-primary-400">
+              <td className="px-2 py-2 text-center text-base font-bold text-primary">
                 {s.goals}
               </td>
-              <td className="px-2 py-2 text-center text-surface-300">{s.assists}</td>
-              <td className="px-2 py-2 text-center text-surface-300">
+              <td className="px-2 py-2 text-center text-muted-foreground">{s.assists}</td>
+              <td className="px-2 py-2 text-center text-muted-foreground">
                 {s.yellow_cards}
               </td>
-              <td className="px-2 py-2 text-center text-surface-300">
+              <td className="px-2 py-2 text-center text-muted-foreground">
                 {s.red_cards}
               </td>
             </tr>

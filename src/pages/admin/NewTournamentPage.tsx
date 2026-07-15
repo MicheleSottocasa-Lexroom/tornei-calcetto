@@ -14,16 +14,16 @@ export default function NewTournamentPage() {
     <section className="space-y-4">
       <Link
         to="/admin"
-        className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-200"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Dashboard admin
       </Link>
 
-      <h1 className="text-xl font-bold text-surface-100">Nuovo torneo</h1>
+      <h1 className="text-xl font-bold text-foreground">Nuovo torneo</h1>
 
       {error && (
-        <Card className="text-sm text-red-400">Errore nella creazione: {error}</Card>
+        <Card className="text-sm text-destructive">Errore nella creazione: {error}</Card>
       )}
 
       <TournamentForm

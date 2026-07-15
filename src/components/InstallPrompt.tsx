@@ -12,7 +12,7 @@ export function InstallPrompt() {
       icon: <Share className="h-5 w-5" />,
       text: (
         <>
-          Tocca il pulsante <strong className="text-surface-100">Condividi</strong> nella barra
+          Tocca il pulsante <strong className="text-foreground">Condividi</strong> nella barra
           di Safari.
         </>
       ),
@@ -21,7 +21,7 @@ export function InstallPrompt() {
       icon: <Plus className="h-5 w-5" />,
       text: (
         <>
-          Scegli <strong className="text-surface-100">Aggiungi a schermata Home</strong> e
+          Scegli <strong className="text-foreground">Aggiungi a schermata Home</strong> e
           conferma.
         </>
       ),
@@ -40,12 +40,12 @@ export function InstallPrompt() {
   return (
     <Card className="space-y-4">
       <div className="flex items-start gap-3">
-        <span className="rounded-lg bg-primary-600/15 p-2 text-primary-400">
+        <span className="rounded-lg bg-primary/15 p-2 text-primary">
           <Smartphone className="h-6 w-6" />
         </span>
         <div>
-          <h2 className="font-semibold text-surface-100">Installa l&apos;app</h2>
-          <p className="text-sm text-surface-400">
+          <h2 className="font-semibold text-foreground">Installa l&apos;app</h2>
+          <p className="text-sm text-muted-foreground">
             Su iPhone e iPad le notifiche funzionano solo dopo aver aggiunto Tornei Calcetto
             alla schermata Home.
           </p>
@@ -55,11 +55,11 @@ export function InstallPrompt() {
       <ol className="space-y-3">
         {steps.map((step, index) => (
           <li key={index} className="flex items-center gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-700 text-sm font-semibold text-surface-100">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
               {index + 1}
             </span>
-            <span className="text-primary-400">{step.icon}</span>
-            <span className="text-sm text-surface-300">{step.text}</span>
+            <span className="text-primary">{step.icon}</span>
+            <span className="text-sm text-muted-foreground">{step.text}</span>
           </li>
         ))}
       </ol>

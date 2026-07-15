@@ -29,8 +29,8 @@ function TournamentRow({ tournament }: { tournament: Tournament }) {
     <Card className="space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="truncate font-semibold text-surface-100">{tournament.name}</h3>
-          <p className="mt-0.5 text-xs text-surface-500">
+          <h3 className="truncate font-semibold text-foreground">{tournament.name}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">
             {FORMAT_LABELS[tournament.format]}
           </p>
         </div>
@@ -42,7 +42,7 @@ function TournamentRow({ tournament }: { tournament: Tournament }) {
       <div>
         <label
           htmlFor={`status-${tournament.id}`}
-          className="mb-1 block text-xs font-medium text-surface-400"
+          className="mb-1 block text-xs font-medium text-muted-foreground"
         >
           Stato torneo
         </label>
@@ -89,7 +89,7 @@ export default function AdminDashboardPage() {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-xl font-bold text-surface-100">Dashboard admin</h1>
+        <h1 className="text-xl font-bold text-foreground">Dashboard admin</h1>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
           <Spinner label="Caricamento tornei…" />
         </div>
       ) : error ? (
-        <Card className="text-sm text-red-400">
+        <Card className="text-sm text-destructive">
           Errore nel caricamento dei tornei.
         </Card>
       ) : !tournaments || tournaments.length === 0 ? (

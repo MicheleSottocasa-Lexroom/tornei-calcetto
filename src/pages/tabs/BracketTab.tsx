@@ -35,7 +35,7 @@ export default function BracketTab() {
   if (matchesError || teamsError) {
     return (
       <EmptyState
-        icon={<AlertTriangle className="h-10 w-10 text-red-400" />}
+        icon={<AlertTriangle className="h-10 w-10 text-destructive" />}
         title="Errore di caricamento"
         description="Impossibile caricare il tabellone. Riprova più tardi."
       />

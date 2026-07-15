@@ -85,7 +85,7 @@ export default function ManageSchedulePage() {
   }
 
   if (!tournament) {
-    return <Card className="text-sm text-surface-400">Torneo non trovato.</Card>;
+    return <Card className="text-sm text-muted-foreground">Torneo non trovato.</Card>;
   }
 
   const format = tournament.format;
@@ -95,26 +95,26 @@ export default function ManageSchedulePage() {
     <section className="space-y-4">
       <Link
         to="/admin"
-        className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-200"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Dashboard admin
       </Link>
 
       <div className="space-y-1">
-        <h1 className="text-xl font-bold text-surface-100">Calendario</h1>
-        <p className="text-sm text-surface-400">
+        <h1 className="text-xl font-bold text-foreground">Calendario</h1>
+        <p className="text-sm text-muted-foreground">
           {tournament.name} · {FORMAT_LABELS[format]} · {activeTeams.length} squadre
         </p>
       </div>
 
       {error && (
-        <Card className="flex items-center justify-between gap-2 text-sm text-red-400">
+        <Card className="flex items-center justify-between gap-2 text-sm text-destructive">
           <span>{error}</span>
           <button
             type="button"
             onClick={clearError}
-            className="text-xs text-surface-400 hover:text-surface-200"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             Chiudi
           </button>
@@ -124,7 +124,7 @@ export default function ManageSchedulePage() {
       {/* Generazione per formato */}
       {(format === 'round_robin' || format === 'league') && (
         <Card className="space-y-3">
-          <p className="text-sm text-surface-300">
+          <p className="text-sm text-muted-foreground">
             Genera automaticamente tutte le giornate del{' '}
             {format === 'league' ? 'campionato' : 'girone all’italiana'}.
             {hasMatches && ' Le partite esistenti verranno sostituite.'}
@@ -149,14 +149,14 @@ export default function ManageSchedulePage() {
             Genera calendario
           </Button>
           {activeTeams.length < 2 && (
-            <p className="text-xs text-surface-500">Servono almeno 2 squadre.</p>
+            <p className="text-xs text-muted-foreground">Servono almeno 2 squadre.</p>
           )}
         </Card>
       )}
 
       {format === 'knockout' && (
         <Card className="space-y-3">
-          <p className="text-sm text-surface-300">
+          <p className="text-sm text-muted-foreground">
             Genera il tabellone a eliminazione diretta (i bye vengono gestiti
             automaticamente).
             {hasMatches && ' Il tabellone esistente verrà sostituito.'}
@@ -181,7 +181,7 @@ export default function ManageSchedulePage() {
             Genera tabellone
           </Button>
           {activeTeams.length < 2 && (
-            <p className="text-xs text-surface-500">Servono almeno 2 squadre.</p>
+            <p className="text-xs text-muted-foreground">Servono almeno 2 squadre.</p>
           )}
         </Card>
       )}
@@ -190,7 +190,7 @@ export default function ManageSchedulePage() {
         <>
           {/* Creazione gironi */}
           <Card className="space-y-3">
-            <p className="text-sm font-semibold text-surface-100">Gironi</p>
+            <p className="text-sm font-semibold text-foreground">Gironi</p>
             <div className="flex gap-2">
               <Input
                 value={groupName}
@@ -225,7 +225,7 @@ export default function ManageSchedulePage() {
             return (
               <Card key={g.id} className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold text-surface-100">{g.name}</p>
+                  <p className="font-semibold text-foreground">{g.name}</p>
                   <button
                     type="button"
                     onClick={() => {
@@ -236,7 +236,7 @@ export default function ManageSchedulePage() {
                         { onError },
                       );
                     }}
-                    className="rounded-lg p-1.5 text-surface-400 hover:bg-surface-800 hover:text-red-400"
+                    className="rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-destructive"
                     aria-label="Elimina girone"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -244,13 +244,13 @@ export default function ManageSchedulePage() {
                 </div>
 
                 {groupTeamCount === 0 ? (
-                  <p className="text-xs text-surface-500">Nessuna squadra assegnata.</p>
+                  <p className="text-xs text-muted-foreground">Nessuna squadra assegnata.</p>
                 ) : (
                   <ul className="space-y-1">
                     {g.team_ids.map((tid) => (
                       <li
                         key={tid}
-                        className="flex items-center justify-between rounded-lg bg-surface-900/60 px-3 py-1.5 text-sm text-surface-100"
+                        className="flex items-center justify-between rounded-lg bg-background/60 px-3 py-1.5 text-sm text-foreground"
                       >
                         <span className="truncate">{teamNameById(tid)}</span>
                         <button
@@ -262,7 +262,7 @@ export default function ManageSchedulePage() {
                               { onError },
                             );
                           }}
-                          className="rounded p-1 text-surface-400 hover:text-red-400"
+                          className="rounded p-1 text-muted-foreground hover:text-destructive"
                           aria-label="Rimuovi squadra dal girone"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -318,7 +318,7 @@ export default function ManageSchedulePage() {
 
           {(groups ?? []).length > 0 && (
             <Card className="space-y-3">
-              <p className="text-sm text-surface-300">
+              <p className="text-sm text-muted-foreground">
                 Quando tutte le partite dei gironi sono concluse, genera il tabellone
                 playoff con le squadre qualificate.
               </p>
@@ -344,7 +344,7 @@ export default function ManageSchedulePage() {
       {/* Partite generate */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-surface-200">Partite</h2>
+          <h2 className="text-sm font-semibold text-foreground">Partite</h2>
           {hasMatches && (
             <Badge tone="default">{(matches ?? []).length} partite</Badge>
           )}

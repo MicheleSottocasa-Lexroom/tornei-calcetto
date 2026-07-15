@@ -45,7 +45,7 @@ export function ScheduleList({ matches, teamsById }: ScheduleListProps) {
     <div className="space-y-6">
       {sections.map((section) => (
         <div key={section.key} className="space-y-2">
-          <h3 className="text-sm font-semibold text-surface-300">{section.label}</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{section.label}</h3>
           <div className="space-y-2">
             {section.matches.map((m) => (
               <MatchRow
@@ -85,11 +85,11 @@ function MatchRow({
     match.home_penalties != null && match.away_penalties != null;
 
   return (
-    <div className="rounded-lg border border-surface-800 bg-surface-800/40 p-3">
-      <div className="mb-2 flex items-center justify-between gap-2 text-xs text-surface-400">
+    <div className="rounded-lg border border-border bg-card/40 p-3">
+      <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
         <span className="truncate">{formatDateTime(match.scheduled_at)}</span>
         <div className="flex shrink-0 items-center gap-2">
-          {groupLabel && <span className="text-surface-500">{groupLabel}</span>}
+          {groupLabel && <span className="text-muted-foreground">{groupLabel}</span>}
           <Badge tone={meta.tone}>
             {match.status === 'live' && (
               <span className="mr-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
@@ -102,23 +102,23 @@ function MatchRow({
         <span
           className={cn(
             'truncate text-right text-sm',
-            homeWin ? 'font-bold text-surface-50' : 'text-surface-200',
+            homeWin ? 'font-bold text-foreground' : 'text-foreground',
           )}
         >
           {homeName}
         </span>
         <div className="flex flex-col items-center">
           {showScore ? (
-            <span className="whitespace-nowrap text-base font-bold text-surface-50">
+            <span className="whitespace-nowrap text-base font-bold text-foreground">
               {match.home_score ?? 0}
-              <span className="mx-1 text-surface-500">-</span>
+              <span className="mx-1 text-muted-foreground">-</span>
               {match.away_score ?? 0}
             </span>
           ) : (
-            <span className="text-xs font-medium text-surface-500">vs</span>
+            <span className="text-xs font-medium text-muted-foreground">vs</span>
           )}
           {hasPens && (
-            <span className="text-[10px] text-surface-400">
+            <span className="text-[10px] text-muted-foreground">
               rig. {match.home_penalties}-{match.away_penalties}
             </span>
           )}
@@ -126,14 +126,14 @@ function MatchRow({
         <span
           className={cn(
             'truncate text-left text-sm',
-            awayWin ? 'font-bold text-surface-50' : 'text-surface-200',
+            awayWin ? 'font-bold text-foreground' : 'text-foreground',
           )}
         >
           {awayName}
         </span>
       </div>
       {match.venue && (
-        <div className="mt-2 text-center text-xs text-surface-500">{match.venue}</div>
+        <div className="mt-2 text-center text-xs text-muted-foreground">{match.venue}</div>
       )}
     </div>
   );

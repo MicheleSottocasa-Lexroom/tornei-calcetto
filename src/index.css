@@ -2,9 +2,132 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------ */
+/* Font aziendale Suisse Intl (stile lexroom)                          */
+/* ------------------------------------------------------------------ */
+@font-face {
+  font-family: 'Suisse';
+  src: url('/fonts/Suisse/SuisseIntl-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse';
+  src: url('/fonts/Suisse/SuisseIntl-Book.woff2') format('woff2');
+  font-weight: 350;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse';
+  src: url('/fonts/Suisse/SuisseIntl-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse';
+  src: url('/fonts/Suisse/SuisseIntl-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse';
+  src: url('/fonts/Suisse/SuisseIntl-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse';
+  src: url('/fonts/Suisse/SuisseIntl-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Design tokens (shadcn / lexroom) — valori HSL grezzi per alpha      */
+/* ------------------------------------------------------------------ */
 @layer base {
   :root {
+    color-scheme: light;
+
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+
+    --primary: 214 82% 34%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 214 41% 92%;
+    --accent-foreground: 214 82% 24%;
+
+    --destructive: 351 83% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 72% 29%;
+    --success-foreground: 141 84% 96%;
+
+    --warning: 38 92% 45%;
+    --warning-foreground: 48 96% 97%;
+
+    --border: 216 12% 84%;
+    --input: 216 12% 84%;
+    --ring: 214 82% 34%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
     color-scheme: dark;
+
+    --background: 224 24% 6%;
+    --foreground: 0 0% 98%;
+
+    --card: 224 20% 9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 224 20% 11%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 214 82% 52%;
+    --primary-foreground: 224 24% 6%;
+
+    --secondary: 224 14% 16%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 224 14% 16%;
+    --muted-foreground: 220 9% 65%;
+
+    --accent: 214 40% 22%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 358 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 65% 45%;
+    --success-foreground: 141 84% 96%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 48 96% 10%;
+
+    --border: 224 14% 18%;
+    --input: 224 14% 20%;
+    --ring: 214 82% 52%;
   }
 
   html,
@@ -13,9 +136,14 @@
     height: 100%;
   }
 
+  * {
+    @apply border-border;
+  }
+
   body {
-    @apply bg-surface-900 text-surface-100 antialiased;
-    font-family: theme('fontFamily.sans');
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Suisse', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+      'Helvetica Neue', Arial, sans-serif;
     /* Safe area per notch iOS in modalità standalone */
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
       env(safe-area-inset-bottom) env(safe-area-inset-left);
@@ -24,10 +152,23 @@
   * {
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* Scrollbar sottile (stile lexroom) */
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.4);
+    border-radius: 3px;
+  }
 }
 
 @layer components {
   .card-surface {
-    @apply rounded-xl border border-surface-800 bg-surface-800/60;
+    @apply rounded-lg border border-border bg-card shadow-sm;
   }
 }

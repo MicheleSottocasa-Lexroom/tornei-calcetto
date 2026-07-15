@@ -76,7 +76,7 @@ export default function ResultsEntryPage() {
   }
 
   if (!tournament) {
-    return <Card className="text-sm text-surface-400">Torneo non trovato.</Card>;
+    return <Card className="text-sm text-muted-foreground">Torneo non trovato.</Card>;
   }
 
   /* ---- Dettaglio: form di inserimento risultato ---- */
@@ -89,23 +89,23 @@ export default function ResultsEntryPage() {
             setSelectedId(null);
             setError(null);
           }}
-          className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-200"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Tutte le partite
         </button>
 
         <div className="space-y-1">
-          <p className="text-xs text-surface-500">{matchLabel(selectedMatch)}</p>
-          <h1 className="text-lg font-bold text-surface-100">
+          <p className="text-xs text-muted-foreground">{matchLabel(selectedMatch)}</p>
+          <h1 className="text-lg font-bold text-foreground">
             {teamName(selectedMatch.home_team_id)}{' '}
-            <span className="text-surface-500">vs</span>{' '}
+            <span className="text-muted-foreground">vs</span>{' '}
             {teamName(selectedMatch.away_team_id)}
           </h1>
         </div>
 
         {error && (
-          <Card className="text-sm text-red-400">Errore nel salvataggio: {error}</Card>
+          <Card className="text-sm text-destructive">Errore nel salvataggio: {error}</Card>
         )}
 
         {loadingEvents ? (
@@ -147,15 +147,15 @@ export default function ResultsEntryPage() {
     <section className="space-y-4">
       <Link
         to="/admin"
-        className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-200"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Dashboard admin
       </Link>
 
       <div className="space-y-1">
-        <h1 className="text-xl font-bold text-surface-100">Risultati</h1>
-        <p className="text-sm text-surface-400">{tournament.name}</p>
+        <h1 className="text-xl font-bold text-foreground">Risultati</h1>
+        <p className="text-sm text-muted-foreground">{tournament.name}</p>
       </div>
 
       {list.length === 0 ? (
@@ -165,7 +165,7 @@ export default function ResultsEntryPage() {
           action={
             <Link
               to={`/admin/tornei/${tournament.id}/calendario`}
-              className="text-sm text-primary-400 hover:text-primary-300"
+              className="text-sm text-primary hover:text-primary"
             >
               Vai al calendario
             </Link>
@@ -185,28 +185,28 @@ export default function ResultsEntryPage() {
                   setError(null);
                   setSelectedId(m.id);
                 }}
-                className="w-full rounded-xl border border-surface-800 bg-surface-800/60 p-3 text-left transition-colors hover:bg-surface-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-xl border border-border bg-card/60 p-3 text-left transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-surface-500">{matchLabel(m)}</span>
+                  <span className="text-xs text-muted-foreground">{matchLabel(m)}</span>
                   <Badge tone={statusTone(m.status)}>
                     {MATCH_STATUS_LABELS[m.status]}
                   </Badge>
                 </div>
                 <div className="mt-1 flex items-center justify-between gap-2">
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-surface-100">
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
                     {teamName(m.home_team_id)}{' '}
-                    <span className="text-surface-500">vs</span>{' '}
+                    <span className="text-muted-foreground">vs</span>{' '}
                     {teamName(m.away_team_id)}
                   </span>
                   <span className="flex items-center gap-2">
                     {scored && (
-                      <span className="tabular-nums text-sm font-semibold text-surface-100">
+                      <span className="tabular-nums text-sm font-semibold text-foreground">
                         {m.home_score} - {m.away_score}
                       </span>
                     )}
                     {playable && (
-                      <ChevronRight className="h-4 w-4 text-surface-500" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
                   </span>
                 </div>

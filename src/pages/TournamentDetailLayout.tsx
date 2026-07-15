@@ -59,7 +59,7 @@ export default function TournamentDetailLayout() {
     <section className="space-y-4">
       <Link
         to="/"
-        className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-200"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Tornei
@@ -83,7 +83,7 @@ export default function TournamentDetailLayout() {
         <>
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold text-surface-100">
+              <h1 className="text-xl font-bold text-foreground">
                 {tournament.name}
               </h1>
               <Badge tone={STATUS_TONE[tournament.status]}>
@@ -91,9 +91,9 @@ export default function TournamentDetailLayout() {
               </Badge>
             </div>
             {tournament.description && (
-              <p className="text-sm text-surface-400">{tournament.description}</p>
+              <p className="text-sm text-muted-foreground">{tournament.description}</p>
             )}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-surface-500">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span>{FORMAT_LABELS[tournament.format] ?? tournament.format}</span>
               {(tournament.starts_at || tournament.ends_at) && (
                 <span className="inline-flex items-center gap-1">

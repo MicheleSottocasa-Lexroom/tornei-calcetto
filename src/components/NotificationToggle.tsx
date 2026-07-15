@@ -70,15 +70,15 @@ export function NotificationToggle() {
         <span
           className={cn(
             'rounded-lg p-2',
-            enabled ? 'bg-primary-600/15 text-primary-400' : 'bg-surface-700 text-surface-300',
+            enabled ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground',
           )}
         >
           {enabled ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-surface-100">Notifiche push</p>
-          <p className="text-sm text-surface-400">
+          <p className="font-medium text-foreground">Notifiche push</p>
+          <p className="text-sm text-muted-foreground">
             {enabled
               ? 'Riceverai promemoria delle partite e i risultati.'
               : 'Attiva per ricevere promemoria e risultati in tempo reale.'}
@@ -94,9 +94,9 @@ export function NotificationToggle() {
           disabled={busy || loading || denied}
           className={cn(
             'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-900',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
             'disabled:cursor-not-allowed disabled:opacity-60',
-            enabled ? 'bg-primary-600' : 'bg-surface-600',
+            enabled ? 'bg-primary' : 'bg-muted',
           )}
         >
           <span
@@ -111,14 +111,14 @@ export function NotificationToggle() {
       </div>
 
       {denied && (
-        <p className="flex items-start gap-2 text-sm text-amber-400">
+        <p className="flex items-start gap-2 text-sm text-warning">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           Le notifiche sono bloccate. Sbloccale dalle impostazioni del browser per questo sito.
         </p>
       )}
 
       {error && !denied && (
-        <p className="flex items-start gap-2 text-sm text-red-400">
+        <p className="flex items-start gap-2 text-sm text-destructive">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           {error}
         </p>

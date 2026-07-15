@@ -47,18 +47,18 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'w-full max-w-md rounded-t-2xl border border-surface-800 bg-surface-900 p-4 shadow-xl sm:rounded-2xl',
+          'w-full max-w-md rounded-t-2xl border border-border bg-background p-4 shadow-xl sm:rounded-2xl',
           className,
         )}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-surface-100">{title}</h2>
+            <h2 className="text-lg font-semibold text-foreground">{title}</h2>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1 text-surface-400 hover:bg-surface-800 hover:text-surface-100"
+              className="rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
               aria-label="Chiudi"
             >
               <X className="h-5 w-5" />

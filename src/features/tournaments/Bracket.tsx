@@ -45,7 +45,7 @@ export function Bracket({ matches, teamsById }: BracketProps) {
       <div className="flex gap-4">
         {columns.map((col) => (
           <div key={col.round} className="flex min-w-[200px] flex-col gap-3">
-            <h3 className="text-center text-xs font-semibold uppercase tracking-wide text-primary-400">
+            <h3 className="text-center text-xs font-semibold uppercase tracking-wide text-primary">
               {col.label}
             </h3>
             <div className="flex flex-1 flex-col justify-around gap-3">
@@ -84,9 +84,9 @@ function BracketMatch({
     match.round_name && match.round_name !== columnLabel ? match.round_name : null;
 
   return (
-    <div className="rounded-lg border border-surface-800 bg-surface-800/40 p-2">
+    <div className="rounded-lg border border-border bg-card/40 p-2">
       {caption && (
-        <div className="mb-1 text-center text-[10px] uppercase text-surface-500">
+        <div className="mb-1 text-center text-[10px] uppercase text-muted-foreground">
           {caption}
         </div>
       )}
@@ -96,7 +96,7 @@ function BracketMatch({
         pens={hasPens ? match.home_penalties : null}
         winner={isWinner(match, match.home_team_id)}
       />
-      <div className="my-1 border-t border-surface-800/70" />
+      <div className="my-1 border-t border-border/70" />
       <BracketSlot
         name={teamName(match.away_team_id, teamsById)}
         score={showScore ? match.away_score : null}
@@ -122,18 +122,18 @@ function BracketSlot({
     <div
       className={cn(
         'flex items-center justify-between gap-2',
-        winner ? 'text-surface-50' : 'text-surface-300',
+        winner ? 'text-foreground' : 'text-muted-foreground',
       )}
     >
       <span className={cn('truncate text-sm', winner && 'font-bold')}>{name}</span>
       <span className="flex shrink-0 items-center gap-1">
         {pens != null && (
-          <span className="text-[10px] text-surface-500">({pens})</span>
+          <span className="text-[10px] text-muted-foreground">({pens})</span>
         )}
         <span
           className={cn(
             'w-5 text-right text-sm tabular-nums',
-            winner ? 'font-bold text-primary-400' : 'text-surface-400',
+            winner ? 'font-bold text-primary' : 'text-muted-foreground',
           )}
         >
           {score ?? '–'}

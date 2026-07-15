@@ -8,7 +8,7 @@ import { BottomNav } from './BottomNav';
  */
 export function AppShell() {
   return (
-    <div className="flex min-h-full flex-col bg-surface-900">
+    <div className="flex min-h-full flex-col bg-background">
       <Header />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-4">
         <Outlet />

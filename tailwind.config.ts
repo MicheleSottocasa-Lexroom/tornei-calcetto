@@ -1,41 +1,67 @@
 import type { Config } from 'tailwindcss';
 
+/** Helper: mappa un token CSS su un colore Tailwind con supporto opacità. */
+function token(name: string) {
+  return `hsl(var(--${name}) / <alpha-value>)`;
+}
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        border: token('border'),
+        input: token('input'),
+        ring: token('ring'),
+        background: token('background'),
+        foreground: token('foreground'),
         primary: {
-          DEFAULT: '#16a34a',
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
+          DEFAULT: token('primary'),
+          foreground: token('primary-foreground'),
         },
-        surface: {
-          DEFAULT: '#0f172a',
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
+        secondary: {
+          DEFAULT: token('secondary'),
+          foreground: token('secondary-foreground'),
         },
+        muted: {
+          DEFAULT: token('muted'),
+          foreground: token('muted-foreground'),
+        },
+        accent: {
+          DEFAULT: token('accent'),
+          foreground: token('accent-foreground'),
+        },
+        destructive: {
+          DEFAULT: token('destructive'),
+          foreground: token('destructive-foreground'),
+        },
+        success: {
+          DEFAULT: token('success'),
+          foreground: token('success-foreground'),
+        },
+        warning: {
+          DEFAULT: token('warning'),
+          foreground: token('warning-foreground'),
+        },
+        card: {
+          DEFAULT: token('card'),
+          foreground: token('card-foreground'),
+        },
+        popover: {
+          DEFAULT: token('popover'),
+          foreground: token('popover-foreground'),
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
         sans: [
+          'Suisse',
+          'ui-sans-serif',
           'system-ui',
           '-apple-system',
           'Segoe UI',

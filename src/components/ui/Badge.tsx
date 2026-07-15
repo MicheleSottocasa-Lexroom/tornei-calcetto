@@ -8,12 +8,12 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const toneClasses: Record<Tone, string> = {
-  default: 'bg-surface-700 text-surface-200',
-  primary: 'bg-primary-600/20 text-primary-300 border border-primary-600/40',
-  success: 'bg-green-600/20 text-green-300 border border-green-600/40',
-  warning: 'bg-amber-500/20 text-amber-300 border border-amber-500/40',
-  danger: 'bg-red-600/20 text-red-300 border border-red-600/40',
-  live: 'bg-red-600 text-white',
+  default: 'bg-muted text-foreground',
+  primary: 'bg-primary/20 text-primary border border-primary/40',
+  success: 'bg-success/20 text-success border border-success/40',
+  warning: 'bg-warning/20 text-warning border border-warning/40',
+  danger: 'bg-destructive/20 text-destructive border border-destructive/40',
+  live: 'bg-destructive text-white',
 };
 
 export function Badge({ tone = 'default', className, children, ...props }: BadgeProps) {

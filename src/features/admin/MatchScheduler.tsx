@@ -61,12 +61,12 @@ function MatchRow({ match, tournamentId, teamName }: MatchRowProps) {
   };
 
   return (
-    <div className="rounded-lg border border-surface-800 bg-surface-900/60 p-3">
+    <div className="rounded-lg border border-border bg-background/60 p-3">
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-surface-100">
+          <p className="truncate text-sm font-medium text-foreground">
             {teamName(match.home_team_id)}{' '}
-            <span className="text-surface-500">vs</span>{' '}
+            <span className="text-muted-foreground">vs</span>{' '}
             {teamName(match.away_team_id)}
           </p>
         </div>
@@ -160,9 +160,9 @@ export function MatchScheduler({
       {sections.map((section, i) => (
         <Card key={i} className="space-y-2">
           <div className="flex items-baseline justify-between">
-            <p className="text-sm font-semibold text-surface-100">{section.title}</p>
+            <p className="text-sm font-semibold text-foreground">{section.title}</p>
             {section.sub && (
-              <span className="text-xs text-surface-500">{section.sub}</span>
+              <span className="text-xs text-muted-foreground">{section.sub}</span>
             )}
           </div>
           <div className="space-y-2">

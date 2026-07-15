@@ -18,9 +18,9 @@ export function PagePlaceholder({
 }) {
   return (
     <section className="space-y-4">
-      <h1 className="text-xl font-bold text-surface-100">{title}</h1>
-      <Card className="flex items-center gap-3 text-surface-400">
-        <Construction className="h-5 w-5 text-primary-500" />
+      <h1 className="text-xl font-bold text-foreground">{title}</h1>
+      <Card className="flex items-center gap-3 text-muted-foreground">
+        <Construction className="h-5 w-5 text-primary" />
         <div>
           <p className="text-sm">
             {description ?? 'Pagina in costruzione (placeholder della Fondazione).'}

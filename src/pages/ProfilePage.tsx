@@ -39,17 +39,17 @@ export default function ProfilePage() {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-xl font-bold text-surface-100">Profilo</h1>
+      <h1 className="text-xl font-bold text-foreground">Profilo</h1>
 
       {/* Intestazione account */}
       <Card className="flex items-center gap-3">
         <Avatar src={profile?.avatar_url} name={displayName} size="lg" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="truncate font-medium text-surface-100">{displayName}</p>
+            <p className="truncate font-medium text-foreground">{displayName}</p>
             {isAdmin && <Badge tone="primary">Amministratore</Badge>}
           </div>
-          <p className="truncate text-sm text-surface-400">{user?.email}</p>
+          <p className="truncate text-sm text-muted-foreground">{user?.email}</p>
         </div>
       </Card>
 
@@ -68,12 +68,12 @@ export default function ProfilePage() {
             />
           </FormField>
           {updateProfile.isError && (
-            <p className="text-sm text-red-400">
+            <p className="text-sm text-destructive">
               Impossibile salvare le modifiche. Riprova.
             </p>
           )}
           {updateProfile.isSuccess && !dirty && (
-            <p className="text-sm text-primary-400">Profilo aggiornato.</p>
+            <p className="text-sm text-primary">Profilo aggiornato.</p>
           )}
           <Button
             onClick={() => void onSave()}
@@ -103,11 +103,11 @@ export default function ProfilePage() {
               const inner = (
                 <>
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-surface-100">
+                    <p className="truncate font-medium text-foreground">
                       {entry.team.name}
                     </p>
                     {entry.tournament && (
-                      <p className="truncate text-xs text-surface-500">
+                      <p className="truncate text-xs text-muted-foreground">
                         {entry.tournament.name}
                       </p>
                     )}
@@ -119,7 +119,7 @@ export default function ProfilePage() {
                       {entry.membership.role === 'captain' ? 'Capitano' : 'Giocatore'}
                     </Badge>
                     {entry.tournament && (
-                      <ChevronRight className="h-4 w-4 text-surface-500" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
                 </>
@@ -130,12 +130,12 @@ export default function ProfilePage() {
                   {entry.tournament ? (
                     <Link
                       to={`/tornei/${entry.tournament.id}/squadre`}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-surface-800 p-3 hover:bg-surface-800/60"
+                      className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 hover:bg-accent/60"
                     >
                       {inner}
                     </Link>
                   ) : (
-                    <div className="flex items-center justify-between gap-3 rounded-lg border border-surface-800 p-3">
+                    <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
                       {inner}
                     </div>
                   )}
@@ -150,13 +150,13 @@ export default function ProfilePage() {
       <Card padded={false}>
         <Link
           to="/impostazioni/notifiche"
-          className="flex items-center justify-between gap-3 p-4 hover:bg-surface-800/60"
+          className="flex items-center justify-between gap-3 p-4 hover:bg-accent/60"
         >
-          <span className="flex items-center gap-2 text-surface-100">
-            <Bell className="h-4 w-4 text-primary-500" />
+          <span className="flex items-center gap-2 text-foreground">
+            <Bell className="h-4 w-4 text-primary" />
             Impostazioni notifiche
           </span>
-          <ChevronRight className="h-4 w-4 text-surface-500" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
       </Card>
 

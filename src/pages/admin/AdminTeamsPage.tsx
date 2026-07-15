@@ -60,7 +60,7 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
             <button
               type="button"
               aria-label="Salva nome"
-              className="rounded-lg p-1.5 text-primary-400 hover:bg-surface-800"
+              className="rounded-lg p-1.5 text-primary hover:bg-accent"
               onClick={() => {
                 const trimmed = name.trim();
                 if (!trimmed) return;
@@ -75,7 +75,7 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
             <button
               type="button"
               aria-label="Annulla"
-              className="rounded-lg p-1.5 text-surface-400 hover:bg-surface-800"
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-accent"
               onClick={() => {
                 setName(team.name);
                 setEditing(false);
@@ -87,13 +87,13 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
         ) : (
           <>
             <div className="flex min-w-0 items-center gap-2">
-              <h3 className="truncate font-semibold text-surface-100">{team.name}</h3>
+              <h3 className="truncate font-semibold text-foreground">{team.name}</h3>
               {withdrawn && <Badge tone="danger">Ritirata</Badge>}
             </div>
             <button
               type="button"
               aria-label="Rinomina"
-              className="rounded-lg p-1.5 text-surface-400 hover:bg-surface-800 hover:text-surface-100"
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
               onClick={() => setEditing(true)}
             >
               <Pencil className="h-4 w-4" />
@@ -104,7 +104,7 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
 
       {/* Rosa */}
       {team.members.length === 0 ? (
-        <p className="text-xs text-surface-500">Rosa vuota.</p>
+        <p className="text-xs text-muted-foreground">Rosa vuota.</p>
       ) : (
         <ul className="space-y-1.5">
           {team.members.map((m) => {
@@ -112,7 +112,7 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
             return (
               <li
                 key={m.id}
-                className="flex items-center justify-between gap-2 rounded-lg bg-surface-900/60 px-2.5 py-1.5"
+                className="flex items-center justify-between gap-2 rounded-lg bg-background/60 px-2.5 py-1.5"
               >
                 <div className="flex min-w-0 items-center gap-2">
                   <Avatar
@@ -121,14 +121,14 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
                     size="sm"
                   />
                   <div className="min-w-0">
-                    <p className="truncate text-sm text-surface-100">
+                    <p className="truncate text-sm text-foreground">
                       {profileName(m.profile)}
                       {m.shirt_number != null && (
-                        <span className="text-surface-500"> · #{m.shirt_number}</span>
+                        <span className="text-muted-foreground"> · #{m.shirt_number}</span>
                       )}
                     </p>
                     {isCaptain && (
-                      <span className="text-xs text-primary-400">Capitano</span>
+                      <span className="text-xs text-primary">Capitano</span>
                     )}
                   </div>
                 </div>
@@ -138,7 +138,7 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
                       type="button"
                       aria-label="Imposta capitano"
                       title="Imposta capitano"
-                      className="rounded p-1.5 text-surface-400 hover:text-primary-400"
+                      className="rounded p-1.5 text-muted-foreground hover:text-primary"
                       onClick={() =>
                         setCaptain.mutate(
                           {
@@ -157,7 +157,7 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
                   <button
                     type="button"
                     aria-label="Rimuovi giocatore"
-                    className="rounded p-1.5 text-surface-400 hover:text-red-400"
+                    className="rounded p-1.5 text-muted-foreground hover:text-destructive"
                     onClick={() =>
                       removeMember.mutate(
                         { tournamentId, memberId: m.id },
@@ -242,7 +242,7 @@ function TeamCard({ tournamentId, team, availableProfiles, onError }: TeamCardPr
           <Button
             variant="ghost"
             size="sm"
-            className="text-red-400 hover:bg-red-500/10"
+            className="text-destructive hover:bg-destructive/10"
             onClick={() => {
               if (!window.confirm(`Ritirare ${team.name}?`)) return;
               updateTeam.mutate(
@@ -281,13 +281,13 @@ export default function AdminTeamsPage() {
     <section className="space-y-4">
       <Link
         to="/admin"
-        className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-200"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Dashboard admin
       </Link>
 
-      <h1 className="text-xl font-bold text-surface-100">Gestione squadre</h1>
+      <h1 className="text-xl font-bold text-foreground">Gestione squadre</h1>
 
       <FormField label="Torneo" htmlFor="tournament">
         <Select
@@ -309,12 +309,12 @@ export default function AdminTeamsPage() {
       </FormField>
 
       {error && (
-        <Card className="flex items-center justify-between gap-2 text-sm text-red-400">
+        <Card className="flex items-center justify-between gap-2 text-sm text-destructive">
           <span>{error}</span>
           <button
             type="button"
             onClick={() => setError(null)}
-            className="text-xs text-surface-400 hover:text-surface-200"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             Chiudi
           </button>

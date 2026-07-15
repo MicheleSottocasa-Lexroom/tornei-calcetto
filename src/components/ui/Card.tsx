@@ -9,7 +9,7 @@ export function Card({ padded = true, className, children, ...props }: CardProps
   return (
     <div
       className={cn(
-        'rounded-xl border border-surface-800 bg-surface-800/60 shadow-sm',
+        'rounded-xl border border-border bg-card/60 shadow-sm',
         padded && 'p-4',
         className,
       )}
@@ -38,7 +38,7 @@ export function CardTitle({
   ...props
 }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn('text-base font-semibold text-surface-100', className)} {...props}>
+    <h3 className={cn('text-base font-semibold text-foreground', className)} {...props}>
       {children}
     </h3>
   );

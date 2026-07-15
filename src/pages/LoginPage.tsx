@@ -36,15 +36,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-900 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm space-y-6 text-center" padded>
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-600">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">
             <Trophy className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-surface-100">Tornei Calcetto</h1>
-            <p className="mt-1 text-sm text-surface-400">
+            <h1 className="text-xl font-bold text-foreground">Tornei Calcetto</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Accedi con il tuo account aziendale
             </p>
           </div>
@@ -59,10 +59,10 @@ export default function LoginPage() {
           Accedi con Google
         </Button>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <p className="text-xs text-surface-500">
-          Riservato agli account del dominio <strong>lexroom.ai</strong>.
+        <p className="text-xs text-muted-foreground">
+          Accedi con il tuo account Google.
         </p>
       </Card>
     </div>

@@ -91,7 +91,7 @@ export function TeamRegistrationForm({
       </FormField>
 
       {createTeam.isError && (
-        <p className="text-sm text-red-400">{teamErrorMessage(createTeam.error)}</p>
+        <p className="text-sm text-destructive">{teamErrorMessage(createTeam.error)}</p>
       )}
 
       <Button type="submit" fullWidth loading={createTeam.isPending}>

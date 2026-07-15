@@ -186,7 +186,7 @@ export function ResultEntryForm({
               onChange={(e) => setHomeScore(e.target.value)}
             />
           </FormField>
-          <span className="pb-3 text-surface-500">-</span>
+          <span className="pb-3 text-muted-foreground">-</span>
           <FormField label={awayTeam?.name ?? 'Ospite'} htmlFor="away_score">
             <Input
               id="away_score"
@@ -211,7 +211,7 @@ export function ResultEntryForm({
               onChange={(e) => setHomePen(e.target.value)}
             />
           </FormField>
-          <span className="pb-3 text-surface-500">-</span>
+          <span className="pb-3 text-muted-foreground">-</span>
           <FormField label="Rigori ospite" htmlFor="away_pen">
             <Input
               id="away_pen"
@@ -242,7 +242,7 @@ export function ResultEntryForm({
 
       {/* Eventi */}
       <Card className="space-y-3">
-        <p className="text-sm font-semibold text-surface-100">Eventi partita</p>
+        <p className="text-sm font-semibold text-foreground">Eventi partita</p>
 
         {events.length === 0 ? (
           <EmptyState
@@ -254,19 +254,19 @@ export function ResultEntryForm({
             {events.map((ev, i) => (
               <li
                 key={ev.id ?? `new-${i}`}
-                className="flex items-center justify-between gap-2 rounded-lg border border-surface-800 bg-surface-900/60 px-3 py-2"
+                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/60 px-3 py-2"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm text-surface-100">
+                  <p className="truncate text-sm text-foreground">
                     <span className="font-medium">
                       {EVENT_TYPE_LABELS[ev.event_type]}
                     </span>{' '}
                     — {ev.player_id ? (playerNames.get(ev.player_id) ?? 'Giocatore') : '—'}
                     {ev.minute != null && (
-                      <span className="text-surface-500"> · {ev.minute}'</span>
+                      <span className="text-muted-foreground"> · {ev.minute}'</span>
                     )}
                   </p>
-                  <p className="truncate text-xs text-surface-500">
+                  <p className="truncate text-xs text-muted-foreground">
                     {teamNameById(ev.team_id)}
                     {ev.assist_player_id &&
                       ` · assist ${playerNames.get(ev.assist_player_id) ?? ''}`}
@@ -275,7 +275,7 @@ export function ResultEntryForm({
                 <button
                   type="button"
                   onClick={() => removeEvent(i)}
-                  className="shrink-0 rounded-lg p-1.5 text-surface-400 hover:bg-surface-800 hover:text-red-400"
+                  className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-destructive"
                   aria-label="Rimuovi evento"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -286,7 +286,7 @@ export function ResultEntryForm({
         )}
 
         {/* Sotto-form aggiungi evento */}
-        <div className="space-y-3 rounded-lg border border-dashed border-surface-700 p-3">
+        <div className="space-y-3 rounded-lg border border-dashed border-border p-3">
           <div className="grid grid-cols-2 gap-2">
             <FormField label="Tipo" htmlFor="ev_type">
               <Select
@@ -376,7 +376,7 @@ export function ResultEntryForm({
             />
           </FormField>
 
-          {eventError && <p className="text-xs text-red-400">{eventError}</p>}
+          {eventError && <p className="text-xs text-destructive">{eventError}</p>}
 
           <Button
             type="button"

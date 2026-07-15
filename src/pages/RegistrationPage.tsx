@@ -92,7 +92,7 @@ export default function RegistrationPage() {
     <section className="space-y-4">
       <Link
         to={`/tornei/${tournamentId}`}
-        className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-200"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Torna al torneo
@@ -100,12 +100,12 @@ export default function RegistrationPage() {
 
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-surface-100">Iscrizione</h1>
+          <h1 className="text-xl font-bold text-foreground">Iscrizione</h1>
           <Badge tone={registrationOpen ? 'success' : 'default'}>
             {statusLabels[tournament.status] ?? tournament.status}
           </Badge>
         </div>
-        <p className="text-sm text-surface-400">{tournament.name}</p>
+        <p className="text-sm text-muted-foreground">{tournament.name}</p>
       </div>
 
       {/* Nessuna squadra e iscrizioni chiuse */}
@@ -132,7 +132,7 @@ export default function RegistrationPage() {
             <Badge tone="primary">{isCaptain ? 'Capitano' : 'Giocatore'}</Badge>
           </CardHeader>
 
-          <p className="mb-3 text-lg font-semibold text-surface-100">{myTeam.name}</p>
+          <p className="mb-3 text-lg font-semibold text-foreground">{myTeam.name}</p>
 
           <RosterEditor
             team={myTeam}
@@ -142,13 +142,13 @@ export default function RegistrationPage() {
           />
 
           {!registrationOpen && (
-            <p className="mt-3 text-xs text-surface-500">
+            <p className="mt-3 text-xs text-muted-foreground">
               Le iscrizioni sono chiuse: la rosa non è più modificabile.
             </p>
           )}
 
           {!isCaptain && registrationOpen && (
-            <div className="mt-4 border-t border-surface-800 pt-3">
+            <div className="mt-4 border-t border-border pt-3">
               <Button
                 variant="danger"
                 size="sm"
@@ -160,7 +160,7 @@ export default function RegistrationPage() {
                 Lascia la squadra
               </Button>
               {leaveTeam.isError && (
-                <p className="mt-2 text-sm text-red-400">
+                <p className="mt-2 text-sm text-destructive">
                   {teamErrorMessage(leaveTeam.error)}
                 </p>
               )}
@@ -176,7 +176,7 @@ export default function RegistrationPage() {
             <CardHeader>
               <CardTitle>Crea una nuova squadra</CardTitle>
             </CardHeader>
-            <p className="mb-3 text-sm text-surface-400">
+            <p className="mb-3 text-sm text-muted-foreground">
               Diventerai il capitano e potrai gestire la rosa.
             </p>
             <TeamRegistrationForm tournamentId={tournamentId} />
@@ -197,11 +197,11 @@ export default function RegistrationPage() {
                 {joinableTeams.map((t) => (
                   <li
                     key={t.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-surface-800 p-3"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-surface-100">{t.name}</p>
-                      <p className="text-xs text-surface-500">
+                      <p className="truncate font-medium text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">
                         {t.members.length}{' '}
                         {t.members.length === 1 ? 'giocatore' : 'giocatori'}
                       </p>
@@ -220,7 +220,7 @@ export default function RegistrationPage() {
               </ul>
             )}
             {joinTeam.isError && (
-              <p className="mt-2 text-sm text-red-400">
+              <p className="mt-2 text-sm text-destructive">
                 {teamErrorMessage(joinTeam.error)}
               </p>
             )}

@@ -48,7 +48,7 @@ export function StandingsTable({ standings }: StandingsTableProps) {
       {groups.map((g) => (
         <div key={g.id} className="space-y-2">
           {g.label && (
-            <h3 className="text-sm font-semibold text-primary-400">{g.label}</h3>
+            <h3 className="text-sm font-semibold text-primary">{g.label}</h3>
           )}
           <StandingsGroupTable rows={g.rows} />
         </div>
@@ -59,10 +59,10 @@ export function StandingsTable({ standings }: StandingsTableProps) {
 
 function StandingsGroupTable({ rows }: { rows: StandingRow[] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-surface-800">
+    <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full min-w-[480px] border-collapse text-sm">
         <thead>
-          <tr className="bg-surface-800/60 text-xs uppercase text-surface-400">
+          <tr className="bg-card/60 text-xs uppercase text-muted-foreground">
             <th className="px-2 py-2 text-center font-medium">#</th>
             <th className="px-2 py-2 text-left font-medium">Squadra</th>
             <th title="Giocate" className="px-2 py-2 text-center font-medium">
@@ -88,7 +88,7 @@ function StandingsGroupTable({ rows }: { rows: StandingRow[] }) {
             </th>
             <th
               title="Punti"
-              className="px-2 py-2 text-center font-semibold text-surface-200"
+              className="px-2 py-2 text-center font-semibold text-foreground"
             >
               Pt
             </th>
@@ -96,23 +96,23 @@ function StandingsGroupTable({ rows }: { rows: StandingRow[] }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.team_id} className="border-t border-surface-800">
-              <td className="px-2 py-2 text-center text-surface-400">{r.position}</td>
-              <td className="px-2 py-2 text-left font-medium text-surface-100">
+            <tr key={r.team_id} className="border-t border-border">
+              <td className="px-2 py-2 text-center text-muted-foreground">{r.position}</td>
+              <td className="px-2 py-2 text-left font-medium text-foreground">
                 {r.team_name}
               </td>
-              <td className="px-2 py-2 text-center text-surface-300">{r.played}</td>
-              <td className="px-2 py-2 text-center text-surface-300">{r.won}</td>
-              <td className="px-2 py-2 text-center text-surface-300">{r.drawn}</td>
-              <td className="px-2 py-2 text-center text-surface-300">{r.lost}</td>
-              <td className="px-2 py-2 text-center text-surface-300">{r.goals_for}</td>
-              <td className="px-2 py-2 text-center text-surface-300">
+              <td className="px-2 py-2 text-center text-muted-foreground">{r.played}</td>
+              <td className="px-2 py-2 text-center text-muted-foreground">{r.won}</td>
+              <td className="px-2 py-2 text-center text-muted-foreground">{r.drawn}</td>
+              <td className="px-2 py-2 text-center text-muted-foreground">{r.lost}</td>
+              <td className="px-2 py-2 text-center text-muted-foreground">{r.goals_for}</td>
+              <td className="px-2 py-2 text-center text-muted-foreground">
                 {r.goals_against}
               </td>
-              <td className="px-2 py-2 text-center text-surface-300">
+              <td className="px-2 py-2 text-center text-muted-foreground">
                 {formatDiff(r.goal_difference)}
               </td>
-              <td className="px-2 py-2 text-center font-bold text-primary-400">
+              <td className="px-2 py-2 text-center font-bold text-primary">
                 {r.points}
               </td>
             </tr>

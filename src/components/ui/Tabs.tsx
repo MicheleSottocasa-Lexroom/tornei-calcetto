@@ -22,7 +22,7 @@ export function Tabs({ items, className }: TabsProps) {
   return (
     <nav
       className={cn(
-        'flex gap-1 overflow-x-auto border-b border-surface-800',
+        'flex gap-1 overflow-x-auto border-b border-border',
         className,
       )}
     >
@@ -35,8 +35,8 @@ export function Tabs({ items, className }: TabsProps) {
             cn(
               'whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
               isActive
-                ? 'border-primary-500 text-primary-400'
-                : 'border-transparent text-surface-400 hover:text-surface-200',
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
             )
           }
         >

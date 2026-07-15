@@ -69,7 +69,7 @@ export function RosterEditor({
 
   return (
     <div className="space-y-3">
-      <ul className="divide-y divide-surface-800">
+      <ul className="divide-y divide-border">
         {members.map((m) => (
           <li key={m.id} className="flex items-center gap-3 py-2">
             <Avatar
@@ -78,11 +78,11 @@ export function RosterEditor({
               size="sm"
             />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-surface-100">
+              <p className="truncate text-sm font-medium text-foreground">
                 {m.profile?.full_name ?? m.profile?.email ?? 'Giocatore'}
               </p>
               {m.shirt_number != null && (
-                <p className="text-xs text-surface-500">Maglia #{m.shirt_number}</p>
+                <p className="text-xs text-muted-foreground">Maglia #{m.shirt_number}</p>
               )}
             </div>
             {m.role === 'captain' ? (
@@ -103,16 +103,16 @@ export function RosterEditor({
       </ul>
 
       {canManage && (
-        <div className="space-y-2 rounded-lg border border-surface-800 p-3">
-          <p className="flex items-center gap-2 text-sm font-medium text-surface-200">
-            <UserPlus className="h-4 w-4 text-primary-500" />
+        <div className="space-y-2 rounded-lg border border-border p-3">
+          <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <UserPlus className="h-4 w-4 text-primary" />
             Aggiungi giocatore
           </p>
 
           {profilesLoading ? (
             <Spinner size="sm" label="Caricamento giocatori…" />
           ) : eligible.length === 0 ? (
-            <p className="text-xs text-surface-500">
+            <p className="text-xs text-muted-foreground">
               Nessun giocatore disponibile: tutti gli utenti sono già iscritti a una
               squadra di questo torneo.
             </p>
@@ -152,10 +152,10 @@ export function RosterEditor({
           )}
 
           {addMember.isError && (
-            <p className="text-sm text-red-400">{teamErrorMessage(addMember.error)}</p>
+            <p className="text-sm text-destructive">{teamErrorMessage(addMember.error)}</p>
           )}
           {removeMember.isError && (
-            <p className="text-sm text-red-400">
+            <p className="text-sm text-destructive">
               {teamErrorMessage(removeMember.error)}
             </p>
           )}

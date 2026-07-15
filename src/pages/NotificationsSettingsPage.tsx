@@ -12,8 +12,8 @@ export default function NotificationsSettingsPage() {
   return (
     <section className="space-y-4">
       <header className="space-y-1">
-        <h1 className="text-xl font-bold text-surface-100">Notifiche</h1>
-        <p className="text-sm text-surface-400">
+        <h1 className="text-xl font-bold text-foreground">Notifiche</h1>
+        <p className="text-sm text-muted-foreground">
           Ricevi i promemoria delle partite e i risultati in tempo reale.
         </p>
       </header>

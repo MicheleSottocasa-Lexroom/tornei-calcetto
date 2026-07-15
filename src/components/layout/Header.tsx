@@ -7,10 +7,10 @@ export function Header() {
   const { user, profile } = useSession();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-surface-800 bg-surface-900/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-semibold text-surface-100">
-          <Trophy className="h-5 w-5 text-primary-500" />
+        <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
+          <Trophy className="h-5 w-5 text-primary" />
           <span>Tornei Calcetto</span>
         </Link>
         {user && (

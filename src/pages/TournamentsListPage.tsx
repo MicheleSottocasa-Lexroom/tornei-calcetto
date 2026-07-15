@@ -52,9 +52,9 @@ export default function TournamentsListPage() {
   if (error) {
     return (
       <section className="space-y-4">
-        <h1 className="text-xl font-bold text-surface-100">Tornei</h1>
+        <h1 className="text-xl font-bold text-foreground">Tornei</h1>
         <EmptyState
-          icon={<AlertTriangle className="h-10 w-10 text-red-400" />}
+          icon={<AlertTriangle className="h-10 w-10 text-destructive" />}
           title="Errore di caricamento"
           description="Impossibile caricare i tornei. Riprova più tardi."
         />
@@ -67,7 +67,7 @@ export default function TournamentsListPage() {
   if (tournaments.length === 0) {
     return (
       <section className="space-y-4">
-        <h1 className="text-xl font-bold text-surface-100">Tornei</h1>
+        <h1 className="text-xl font-bold text-foreground">Tornei</h1>
         <EmptyState
           icon={<Trophy className="h-10 w-10" />}
           title="Nessun torneo"
@@ -82,7 +82,7 @@ export default function TournamentsListPage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-xl font-bold text-surface-100">Tornei</h1>
+      <h1 className="text-xl font-bold text-foreground">Tornei</h1>
       {active.length > 0 && (
         <TournamentSection title="Attivi" tournaments={active} />
       )}
@@ -102,7 +102,7 @@ function TournamentSection({
 }) {
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-surface-400">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h2>
       <div className="space-y-3">
@@ -117,25 +117,25 @@ function TournamentSection({
 function TournamentCard({ tournament: t }: { tournament: Tournament }) {
   return (
     <Link to={`/tornei/${t.id}`} className="block">
-      <Card className="transition-colors hover:border-primary-700 hover:bg-surface-800">
+      <Card className="transition-colors hover:border-primary hover:bg-accent">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold text-surface-100">
+            <h3 className="truncate text-base font-semibold text-foreground">
               {t.name}
             </h3>
-            <p className="mt-0.5 text-xs text-surface-400">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               {FORMAT_LABELS[t.format]}
             </p>
           </div>
           <Badge tone={STATUS_TONE[t.status]}>{STATUS_LABELS[t.status]}</Badge>
         </div>
         {t.description && (
-          <p className="mt-2 line-clamp-2 text-sm text-surface-400">
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
             {t.description}
           </p>
         )}
         {(t.starts_at || t.ends_at) && (
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-surface-500">
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
             <Calendar className="h-3.5 w-3.5" />
             <span>{formatRange(t.starts_at, t.ends_at)}</span>
           </div>
