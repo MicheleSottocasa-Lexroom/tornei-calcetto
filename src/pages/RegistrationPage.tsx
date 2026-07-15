@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Users } from 'lucide-react';
 import { useTournament, useTeams } from '@/hooks/queries';
@@ -6,6 +6,7 @@ import { useSession } from '@/hooks/useSession';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TeamRegistrationForm } from '@/features/teams/TeamRegistrationForm';
@@ -14,6 +15,7 @@ import {
   useJoinTeam,
   useLeaveTeam,
   useTeamParticipants,
+  useTransferCaptaincy,
   teamErrorMessage,
 } from '@/features/teams/hooks';
 import type { TournamentStatus } from '@/types';
@@ -36,6 +38,8 @@ export default function RegistrationPage() {
 
   const joinTeam = useJoinTeam(tournamentId);
   const leaveTeam = useLeaveTeam();
+  const transfer = useTransferCaptaincy(tournamentId);
+  const [newCaptain, setNewCaptain] = useState('');
   const { data: allParticipants } = useTeamParticipants(id);
 
   const registrationOpen = tournament?.status === 'registration_open';
@@ -54,6 +58,11 @@ export default function RegistrationPage() {
   const myParticipants = useMemo(
     () => (allParticipants ?? []).filter((p) => myTeam && p.team_id === myTeam.id),
     [allParticipants, myTeam],
+  );
+
+  const otherMembers = useMemo(
+    () => (myTeam ? myTeam.members.filter((m) => m.profile_id !== user?.id) : []),
+    [myTeam, user?.id],
   );
 
   const takenProfileIds = useMemo(() => {
@@ -173,6 +182,49 @@ export default function RegistrationPage() {
             <p className="mt-3 text-xs text-muted-foreground">
               Le iscrizioni sono chiuse: la rosa non è più modificabile.
             </p>
+          )}
+
+          {isCaptain && otherMembers.length > 0 && (
+            <div className="mt-4 space-y-2 border-t border-border pt-3">
+              <p className="text-sm font-medium text-foreground">
+                Passa la fascia di capitano
+              </p>
+              <div className="flex gap-2">
+                <Select value={newCaptain} onChange={(e) => setNewCaptain(e.target.value)}>
+                  <option value="">Scegli un giocatore…</option>
+                  {otherMembers.map((m) => (
+                    <option key={m.id} value={m.profile_id}>
+                      {m.profile?.full_name ?? m.profile?.email ?? 'Giocatore'}
+                    </option>
+                  ))}
+                </Select>
+                <Button
+                  variant="secondary"
+                  disabled={!newCaptain}
+                  loading={transfer.isPending}
+                  onClick={() => {
+                    if (!newCaptain) return;
+                    if (
+                      !window.confirm(
+                        'Passare la fascia di capitano? Diventerai un giocatore normale.',
+                      )
+                    )
+                      return;
+                    transfer.mutate(
+                      { teamId: myTeam.id, newCaptainId: newCaptain },
+                      { onSuccess: () => setNewCaptain('') },
+                    );
+                  }}
+                >
+                  Passa
+                </Button>
+              </div>
+              {transfer.isError && (
+                <p className="text-sm text-destructive">
+                  {teamErrorMessage(transfer.error)}
+                </p>
+              )}
+            </div>
           )}
 
           {!isCaptain && (

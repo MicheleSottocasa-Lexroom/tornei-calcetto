@@ -459,6 +459,13 @@ export interface Database {
         };
         Returns: undefined;
       };
+      transfer_captaincy: {
+        Args: {
+          p_team_id: string;
+          p_new_captain: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       tournament_format: 'round_robin' | 'knockout' | 'groups_playoff' | 'league';

@@ -438,3 +438,21 @@ export function useLeaveTeam() {
     },
   });
 }
+
+/** Passa la fascia di capitano a un altro membro della squadra. */
+export function useTransferCaptaincy(tournamentId: string) {
+  const queryClient = useQueryClient();
+  return useMutation<void, unknown, { teamId: string; newCaptainId: string }>({
+    mutationFn: async ({ teamId, newCaptainId }) => {
+      const { error } = await supabase.rpc('transfer_captaincy', {
+        p_team_id: teamId,
+        p_new_captain: newCaptainId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: teamsKey(tournamentId) });
+      void queryClient.invalidateQueries({ queryKey: ['my-teams'] });
+    },
+  });
+}

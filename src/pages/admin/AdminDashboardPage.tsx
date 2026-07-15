@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CalendarDays, ClipboardList, Pencil, Plus, ShieldCheck, Trophy, Users } from 'lucide-react';
+import { CalendarDays, ClipboardList, Pencil, Plus, ShieldCheck, Trash2, Trophy, Users } from 'lucide-react';
 import { useTournaments } from '@/hooks/queries';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -12,7 +12,7 @@ import {
   FORMAT_LABELS,
   STATUS_LABELS,
 } from '@/features/admin/TournamentForm';
-import { useUpdateTournament } from '@/features/admin/hooks';
+import { useDeleteTournament, useUpdateTournament } from '@/features/admin/hooks';
 
 const STATUS_TONE: Record<TournamentStatus, Parameters<typeof Badge>[0]['tone']> = {
   draft: 'default',
@@ -24,6 +24,7 @@ const STATUS_TONE: Record<TournamentStatus, Parameters<typeof Badge>[0]['tone']>
 
 function TournamentRow({ tournament }: { tournament: Tournament }) {
   const updateTournament = useUpdateTournament();
+  const del = useDeleteTournament();
 
   return (
     <Card className="space-y-3">
@@ -34,9 +35,28 @@ function TournamentRow({ tournament }: { tournament: Tournament }) {
             {FORMAT_LABELS[tournament.format]}
           </p>
         </div>
-        <Badge tone={STATUS_TONE[tournament.status]}>
-          {STATUS_LABELS[tournament.status]}
-        </Badge>
+        <div className="flex shrink-0 items-center gap-2">
+          <Badge tone={STATUS_TONE[tournament.status]}>
+            {STATUS_LABELS[tournament.status]}
+          </Badge>
+          <button
+            type="button"
+            disabled={del.isPending}
+            onClick={() => {
+              if (
+                !window.confirm(
+                  `Eliminare "${tournament.name}"? Verranno rimossi squadre, partecipanti, calendario, risultati e marcatori. Azione non reversibile.`,
+                )
+              )
+                return;
+              del.mutate({ id: tournament.id });
+            }}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-destructive disabled:opacity-60"
+            aria-label="Elimina torneo"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div>
