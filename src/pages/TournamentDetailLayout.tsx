@@ -1,7 +1,7 @@
 import { Outlet, useParams, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ArrowLeft, Calendar, Pencil } from 'lucide-react';
+import { ArrowLeft, Calendar, Pencil, UserPlus } from 'lucide-react';
 import { useTournament } from '@/hooks/queries';
 import { useRealtimeTournament } from '@/hooks/useRealtimeTournament';
 import { useSession } from '@/hooks/useSession';
@@ -120,6 +120,15 @@ export default function TournamentDetailLayout() {
               )}
             </div>
           </div>
+
+          {tournament.status === 'registration_open' && (
+            <Link to={`/tornei/${tournament.id}/iscrizione`} className="block">
+              <Button fullWidth>
+                <UserPlus className="h-4 w-4" />
+                Iscrivi la tua squadra
+              </Button>
+            </Link>
+          )}
 
           <Tabs items={tabs} />
 
