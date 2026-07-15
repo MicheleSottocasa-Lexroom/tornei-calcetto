@@ -5,6 +5,7 @@ import { registerSW } from 'virtual:pwa-register';
 
 import App from './App';
 import { SessionProvider } from './hooks/useSession';
+import { ThemeProvider } from './hooks/useTheme';
 import { queryClient } from './lib/queryClient';
 import './index.css';
 
@@ -19,10 +20,12 @@ if (!rootEl) {
 
 createRoot(rootEl).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <SessionProvider>
-        <App />
-      </SessionProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>
+          <App />
+        </SessionProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   </StrictMode>,
 );

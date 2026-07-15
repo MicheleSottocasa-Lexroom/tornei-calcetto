@@ -12,6 +12,7 @@ import { FormField } from '@/components/ui/FormField';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ThemeSelector } from '@/components/ThemeSelector';
 
 export default function ProfilePage() {
   const { user, isAdmin, signOut } = useSession();
@@ -51,6 +52,18 @@ export default function ProfilePage() {
           </div>
           <p className="truncate text-sm text-muted-foreground">{user?.email}</p>
         </div>
+      </Card>
+
+      {/* Aspetto / tema */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Aspetto</CardTitle>
+        </CardHeader>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Scegli il tema dell&apos;app. &quot;Sistema&quot; segue le impostazioni del tuo
+          dispositivo.
+        </p>
+        <ThemeSelector />
       </Card>
 
       {/* Modifica nome */}

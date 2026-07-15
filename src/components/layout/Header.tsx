@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { Avatar } from '@/components/ui/Avatar';
+import { ThemeToggle } from '@/components/ThemeSelector';
 
 export function Header() {
   const { user, profile } = useSession();
@@ -13,15 +14,18 @@ export function Header() {
           <Trophy className="h-5 w-5 text-primary" />
           <span>Tornei Calcetto</span>
         </Link>
-        {user && (
-          <Link to="/profilo" aria-label="Profilo">
-            <Avatar
-              src={profile?.avatar_url}
-              name={profile?.full_name ?? user.email}
-              size="sm"
-            />
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {user && (
+            <Link to="/profilo" aria-label="Profilo">
+              <Avatar
+                src={profile?.avatar_url}
+                name={profile?.full_name ?? user.email}
+                size="sm"
+              />
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

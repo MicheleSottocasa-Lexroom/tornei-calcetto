@@ -18,6 +18,28 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+
+    <!-- Tema: applica modalità e temi colore prima del render (no flash) -->
+    <script>
+      (function () {
+        try {
+          var m = localStorage.getItem('theme') || 'system';
+          var light = localStorage.getItem('theme-light') || 'lexroom';
+          var dark = localStorage.getItem('theme-dark') || 'lexroom';
+          var isDark =
+            m === 'dark' ||
+            (m === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var root = document.documentElement;
+          root.classList.toggle('dark', isDark);
+          root.setAttribute('data-light', light);
+          root.setAttribute('data-dark', dark);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', isDark ? '#0a0a0a' : '#ffffff');
+        } catch (e) {
+          /* noop */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
