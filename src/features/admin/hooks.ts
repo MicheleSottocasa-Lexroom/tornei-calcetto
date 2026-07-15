@@ -652,3 +652,92 @@ export function useSetCaptain() {
       qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'teams'] }),
   });
 }
+
+/* ------------------------------------------------------------------ */
+/* Amministratori                                                      */
+/* ------------------------------------------------------------------ */
+
+/** Email pre-autorizzate: diventano admin al primo accesso. */
+export function useAdminAllowlist() {
+  return useQuery<{ email: string }[]>({
+    queryKey: ['allowlist'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('admin_allowlist')
+        .select('email')
+        .order('email', { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export interface SetProfileAdminInput {
+  profileId: string;
+  email: string;
+  value: boolean;
+}
+
+/** Promuove o rimuove un amministratore su un profilo esistente. */
+export function useSetProfileAdmin() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, SetProfileAdminInput>({
+    mutationFn: async ({ profileId, email, value }) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_admin: value })
+        .eq('id', profileId);
+      if (error) throw error;
+      // Rimuovendo l'admin, elimina anche l'eventuale pre-autorizzazione
+      // (altrimenti tornerebbe admin a un futuro accesso).
+      if (!value) {
+        const { error: alErr } = await supabase
+          .from('admin_allowlist')
+          .delete()
+          .eq('email', email);
+        if (alErr) throw alErr;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['profiles', 'all'] });
+      qc.invalidateQueries({ queryKey: ['allowlist'] });
+    },
+  });
+}
+
+/** Aggiunge un admin via email: pre-autorizza e promuove subito se già registrato. */
+export function useAddAdminByEmail() {
+  const qc = useQueryClient();
+  return useMutation<{ promoted: boolean }, Error, { email: string }>({
+    mutationFn: async ({ email }) => {
+      const em = email.trim().toLowerCase();
+      const { error: alErr } = await supabase
+        .from('admin_allowlist')
+        .upsert({ email: em }, { onConflict: 'email', ignoreDuplicates: true });
+      if (alErr) throw alErr;
+      const { data, error: upErr } = await supabase
+        .from('profiles')
+        .update({ is_admin: true })
+        .eq('email', em)
+        .select('id');
+      if (upErr) throw upErr;
+      return { promoted: (data ?? []).length > 0 };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['profiles', 'all'] });
+      qc.invalidateQueries({ queryKey: ['allowlist'] });
+    },
+  });
+}
+
+/** Rimuove una pre-autorizzazione email (non ancora registrata). */
+export function useRemoveAllowlist() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { email: string }>({
+    mutationFn: async ({ email }) => {
+      const { error } = await supabase.from('admin_allowlist').delete().eq('email', email);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['allowlist'] }),
+  });
+}

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CalendarDays, ClipboardList, Pencil, Plus, Trophy, Users } from 'lucide-react';
+import { CalendarDays, ClipboardList, Pencil, Plus, ShieldCheck, Trophy, Users } from 'lucide-react';
 import { useTournaments } from '@/hooks/queries';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -113,6 +113,13 @@ export default function AdminDashboardPage() {
           </Button>
         </Link>
       </div>
+
+      <Link to="/admin/amministratori">
+        <Button variant="secondary" fullWidth>
+          <ShieldCheck className="h-4 w-4" />
+          Amministratori
+        </Button>
+      </Link>
 
       {isLoading ? (
         <div className="py-8">
