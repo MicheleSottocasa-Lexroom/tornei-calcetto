@@ -1,8 +1,8 @@
 import { Outlet, useParams, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ArrowLeft, Calendar, Pencil, UserPlus } from 'lucide-react';
-import { useTournament } from '@/hooks/queries';
+import { ArrowLeft, Calendar, Pencil, UserCheck, UserPlus } from 'lucide-react';
+import { useTeams, useTournament } from '@/hooks/queries';
 import { useRealtimeTournament } from '@/hooks/useRealtimeTournament';
 import { useSession } from '@/hooks/useSession';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
@@ -41,8 +41,14 @@ const FORMAT_LABELS: Record<TournamentFormat, string> = {
 
 export default function TournamentDetailLayout() {
   const { id } = useParams<{ id: string }>();
-  const { isAdmin } = useSession();
+  const { isAdmin, user } = useSession();
   const { data: tournament, isLoading, error } = useTournament(id);
+  const { data: teams } = useTeams(id);
+
+  // Squadra dell'utente in questo torneo (se iscritto).
+  const myTeam = teams?.find((t) =>
+    t.members.some((m) => m.profile_id === user?.id),
+  );
 
   // Aggiornamenti live di partite/eventi per questo torneo.
   useRealtimeTournament(id);
@@ -121,14 +127,21 @@ export default function TournamentDetailLayout() {
             </div>
           </div>
 
-          {tournament.status === 'registration_open' && (
+          {myTeam ? (
+            <Link to={`/tornei/${tournament.id}/iscrizione`} className="block">
+              <Button variant="secondary" fullWidth>
+                <UserCheck className="h-4 w-4" />
+                Sei iscritto con {myTeam.name} · gestisci
+              </Button>
+            </Link>
+          ) : tournament.status === 'registration_open' ? (
             <Link to={`/tornei/${tournament.id}/iscrizione`} className="block">
               <Button fullWidth>
                 <UserPlus className="h-4 w-4" />
                 Iscrivi la tua squadra
               </Button>
             </Link>
-          )}
+          ) : null}
 
           <Tabs items={tabs} />
 

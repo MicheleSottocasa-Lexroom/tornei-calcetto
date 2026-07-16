@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { AlertTriangle, UserPlus, Users } from 'lucide-react';
+import { AlertTriangle, UserCheck, UserPlus, Users } from 'lucide-react';
 import { useTeams, useTournament } from '@/hooks/queries';
+import { useSession } from '@/hooks/useSession';
 import { useTeamParticipants } from '@/features/teams/hooks';
 import { Button, EmptyState, Spinner } from '@/components/ui';
 import { TeamsList } from '@/features/tournaments/TeamsList';
@@ -12,10 +13,21 @@ export default function TeamsTab() {
   const { data: tournament } = useTournament(id);
   const { data, isLoading, error } = useTeams(id);
   const { data: participants } = useTeamParticipants(id);
+  const { user } = useSession();
 
   const registrationOpen = tournament?.status === 'registration_open';
+  const myTeam = (data ?? []).find((t) =>
+    t.members.some((m) => m.profile_id === user?.id),
+  );
 
-  const registerCta = registrationOpen ? (
+  const registerCta = myTeam ? (
+    <Link to={`/tornei/${id}/iscrizione`} className="block">
+      <Button variant="secondary" fullWidth>
+        <UserCheck className="h-4 w-4" />
+        Sei iscritto con {myTeam.name} · gestisci
+      </Button>
+    </Link>
+  ) : registrationOpen ? (
     <Link to={`/tornei/${id}/iscrizione`} className="block">
       <Button fullWidth>
         <UserPlus className="h-4 w-4" />
