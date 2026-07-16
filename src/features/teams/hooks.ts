@@ -162,7 +162,7 @@ export interface RenameTeamInput {
 }
 
 /** Il capitano (o admin) rinomina la propria squadra. */
-export function useRenameTeam(tournamentId: string) {
+export function useRenameTeam() {
   const queryClient = useQueryClient();
 
   return useMutation<void, unknown, RenameTeamInput>({
@@ -174,8 +174,8 @@ export function useRenameTeam(tournamentId: string) {
       if (error) throw error;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: teamsKey(tournamentId) });
       void queryClient.invalidateQueries({ queryKey: ['my-teams'] });
+      void queryClient.invalidateQueries({ queryKey: ['tournament'] });
     },
   });
 }

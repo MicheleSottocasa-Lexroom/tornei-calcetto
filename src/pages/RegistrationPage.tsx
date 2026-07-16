@@ -41,7 +41,7 @@ export default function RegistrationPage() {
   const joinTeam = useJoinTeam(tournamentId);
   const leaveTeam = useLeaveTeam();
   const transfer = useTransferCaptaincy(tournamentId);
-  const rename = useRenameTeam(tournamentId);
+  const rename = useRenameTeam();
   const [newCaptain, setNewCaptain] = useState('');
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');

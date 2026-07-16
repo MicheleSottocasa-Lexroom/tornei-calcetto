@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, ChevronRight, LogOut } from 'lucide-react';
+import { Bell, ChevronRight, LogOut, Pencil } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { useProfile } from '@/hooks/useProfile';
 import {
   useLeaveTeam,
   useMyTeams,
+  useRenameTeam,
   useUpdateProfile,
   teamErrorMessage,
 } from '@/features/teams/hooks';
@@ -24,6 +25,9 @@ export default function ProfilePage() {
   const { data: profile } = useProfile();
   const updateProfile = useUpdateProfile();
   const leaveTeam = useLeaveTeam();
+  const rename = useRenameTeam();
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [teamNameDraft, setTeamNameDraft] = useState('');
   const { data: myTeams, isLoading: teamsLoading } = useMyTeams();
 
   const [name, setName] = useState('');
@@ -146,37 +150,90 @@ export default function ProfilePage() {
 
                 return (
                   <li key={entry.membership.id} className="flex items-center gap-2">
-                    {entry.tournament ? (
-                      <Link
-                        to={`/tornei/${entry.tournament.id}/squadre`}
-                        className="flex flex-1 items-center justify-between gap-3 rounded-lg border border-border p-3 hover:bg-accent/60"
-                      >
-                        {inner}
-                      </Link>
-                    ) : (
-                      <div className="flex flex-1 items-center justify-between gap-3 rounded-lg border border-border p-3">
-                        {inner}
+                    {editingTeamId === entry.team.id ? (
+                      <div className="flex flex-1 items-center gap-2">
+                        <Input
+                          value={teamNameDraft}
+                          onChange={(e) => setTeamNameDraft(e.target.value)}
+                          aria-label="Nome squadra"
+                        />
+                        <Button
+                          size="sm"
+                          loading={rename.isPending}
+                          disabled={
+                            !teamNameDraft.trim() ||
+                            teamNameDraft.trim() === entry.team.name
+                          }
+                          onClick={() => {
+                            const n = teamNameDraft.trim();
+                            if (!n || n === entry.team.name) {
+                              setEditingTeamId(null);
+                              return;
+                            }
+                            rename.mutate(
+                              { teamId: entry.team.id, name: n },
+                              { onSuccess: () => setEditingTeamId(null) },
+                            );
+                          }}
+                        >
+                          Salva
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingTeamId(null)}
+                        >
+                          Annulla
+                        </Button>
                       </div>
+                    ) : (
+                      <>
+                        {entry.tournament ? (
+                          <Link
+                            to={`/tornei/${entry.tournament.id}/squadre`}
+                            className="flex flex-1 items-center justify-between gap-3 rounded-lg border border-border p-3 hover:bg-accent/60"
+                          >
+                            {inner}
+                          </Link>
+                        ) : (
+                          <div className="flex flex-1 items-center justify-between gap-3 rounded-lg border border-border p-3">
+                            {inner}
+                          </div>
+                        )}
+                        {isCaptain && (
+                          <button
+                            type="button"
+                            aria-label="Modifica nome squadra"
+                            className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                            onClick={() => {
+                              setTeamNameDraft(entry.team.name);
+                              setEditingTeamId(entry.team.id);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0 text-destructive"
+                          loading={
+                            leaveTeam.isPending &&
+                            leaveTeam.variables?.teamId === entry.team.id
+                          }
+                          onClick={() => {
+                            const msg = isCaptain
+                              ? `Sei il capitano di ${entry.team.name}. Se sei l'unico membro la squadra verrà eliminata; altrimenti dovrai prima passare la fascia. Continuare?`
+                              : `Uscire da ${entry.team.name}?`;
+                            if (!window.confirm(msg)) return;
+                            leaveTeam.mutate({ teamId: entry.team.id });
+                          }}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Esci
+                        </Button>
+                      </>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="shrink-0 text-destructive"
-                      loading={
-                        leaveTeam.isPending &&
-                        leaveTeam.variables?.teamId === entry.team.id
-                      }
-                      onClick={() => {
-                        const msg = isCaptain
-                          ? `Sei il capitano di ${entry.team.name}. Se sei l'unico membro la squadra verrà eliminata; altrimenti dovrai prima passare la fascia. Continuare?`
-                          : `Uscire da ${entry.team.name}?`;
-                        if (!window.confirm(msg)) return;
-                        leaveTeam.mutate({ teamId: entry.team.id });
-                      }}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Esci
-                    </Button>
                   </li>
                 );
               })}
@@ -184,6 +241,11 @@ export default function ProfilePage() {
             {leaveTeam.isError && (
               <p className="mt-3 text-sm text-destructive">
                 {teamErrorMessage(leaveTeam.error)}
+              </p>
+            )}
+            {rename.isError && (
+              <p className="mt-3 text-sm text-destructive">
+                {teamErrorMessage(rename.error)}
               </p>
             )}
           </>
