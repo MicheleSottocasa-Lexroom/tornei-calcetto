@@ -168,7 +168,7 @@ export function MatchScheduler({
           <div className="space-y-2">
             {section.items.map((m) => (
               <MatchRow
-                key={m.id}
+                key={`${m.id}:${m.scheduled_at ?? ''}:${m.venue ?? ''}`}
                 match={m}
                 tournamentId={tournamentId}
                 teamName={teamName}
