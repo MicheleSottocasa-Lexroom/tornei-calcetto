@@ -333,6 +333,31 @@ export function useGeneratePlayoff() {
   });
 }
 
+export interface AutoScheduleInput {
+  tournamentId: string;
+  /** Istante di inizio (ISO). */
+  start: string;
+  /** Partite per ora (default 2). */
+  perHour?: number;
+}
+
+/** Assegna automaticamente date/orari alle partite (RPC auto_schedule_matches). */
+export function useAutoScheduleMatches() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, AutoScheduleInput>({
+    mutationFn: async ({ tournamentId, start, perHour }) => {
+      const { error } = await supabase.rpc('auto_schedule_matches', {
+        p_tournament_id: tournamentId,
+        p_start: start,
+        p_per_hour: perHour ?? 2,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_d, { tournamentId }) =>
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'matches'] }),
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /* Gironi (groups / group_teams)                                       */
 /* ------------------------------------------------------------------ */

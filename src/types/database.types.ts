@@ -466,6 +466,14 @@ export interface Database {
         };
         Returns: undefined;
       };
+      auto_schedule_matches: {
+        Args: {
+          p_tournament_id: string;
+          p_start: string;
+          p_per_hour?: number;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       tournament_format: 'round_robin' | 'knockout' | 'groups_playoff' | 'league';

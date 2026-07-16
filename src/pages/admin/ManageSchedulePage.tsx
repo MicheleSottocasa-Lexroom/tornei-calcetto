@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Wand2 } from 'lucide-react';
+import { ArrowLeft, CalendarClock, Plus, Trash2, Wand2 } from 'lucide-react';
 import { useMatches, useTeams, useTournament } from '@/hooks/queries';
 import { useRealtimeTournament } from '@/hooks/useRealtimeTournament';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { FormField } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
@@ -14,6 +15,7 @@ import { ManualMatchForm } from '@/features/admin/ManualMatchForm';
 import { FORMAT_LABELS } from '@/features/admin/TournamentForm';
 import {
   useAssignTeamToGroup,
+  useAutoScheduleMatches,
   useCreateGroup,
   useDeleteGroup,
   useGenerateBracket,
@@ -43,9 +45,12 @@ export default function ManageSchedulePage() {
   const deleteGroup = useDeleteGroup();
   const assignTeam = useAssignTeamToGroup();
   const removeTeam = useRemoveTeamFromGroup();
+  const autoSchedule = useAutoScheduleMatches();
 
   const [error, setError] = useState<string | null>(null);
   const [groupName, setGroupName] = useState('');
+  const [schedStart, setSchedStart] = useState('');
+  const [perHour, setPerHour] = useState('2');
 
   const activeTeams = useMemo(
     () => (teams ?? []).filter((t) => t.status !== 'withdrawn'),
@@ -352,6 +357,59 @@ export default function ManageSchedulePage() {
             </Card>
           )}
         </>
+      )}
+
+      {/* Date e orari automatici */}
+      {hasMatches && (
+        <Card className="space-y-3">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Date e orari automatici</p>
+            <p className="text-xs text-muted-foreground">
+              Assegna gli orari a partire dall&apos;inizio scelto, {Number(perHour) || 2}{' '}
+              partite per ora. Sovrascrive gli orari esistenti.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <FormField label="Inizio" htmlFor="sched_start">
+              <Input
+                id="sched_start"
+                type="datetime-local"
+                value={schedStart}
+                onChange={(e) => setSchedStart(e.target.value)}
+              />
+            </FormField>
+            <FormField label="Partite/ora" htmlFor="sched_per_hour">
+              <Input
+                id="sched_per_hour"
+                type="number"
+                min={1}
+                max={4}
+                value={perHour}
+                onChange={(e) => setPerHour(e.target.value)}
+              />
+            </FormField>
+          </div>
+          <Button
+            fullWidth
+            loading={autoSchedule.isPending}
+            disabled={!schedStart}
+            onClick={() => {
+              if (!schedStart) return;
+              clearError();
+              autoSchedule.mutate(
+                {
+                  tournamentId: tournament.id,
+                  start: new Date(schedStart).toISOString(),
+                  perHour: Number(perHour) || 2,
+                },
+                { onError },
+              );
+            }}
+          >
+            <CalendarClock className="h-4 w-4" />
+            Genera date e orari
+          </Button>
+        </Card>
       )}
 
       {/* Partite generate */}
