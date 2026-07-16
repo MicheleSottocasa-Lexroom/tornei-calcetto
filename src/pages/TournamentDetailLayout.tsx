@@ -131,14 +131,19 @@ export default function TournamentDetailLayout() {
             <Link to={`/tornei/${tournament.id}/iscrizione`} className="block">
               <Button variant="secondary" fullWidth>
                 <UserCheck className="h-4 w-4" />
-                Sei iscritto con {myTeam.name} · gestisci
+                {myTeam.pending
+                  ? `Candidatura in attesa · ${myTeam.name}`
+                  : `Sei iscritto con ${myTeam.name} · gestisci`}
               </Button>
             </Link>
-          ) : tournament.status === 'registration_open' ? (
+          ) : tournament.status === 'registration_open' ||
+            tournament.status === 'in_progress' ? (
             <Link to={`/tornei/${tournament.id}/iscrizione`} className="block">
               <Button fullWidth>
                 <UserPlus className="h-4 w-4" />
-                Iscrivi la tua squadra
+                {tournament.status === 'in_progress'
+                  ? 'Candida la tua squadra'
+                  : 'Iscrivi la tua squadra'}
               </Button>
             </Link>
           ) : null}

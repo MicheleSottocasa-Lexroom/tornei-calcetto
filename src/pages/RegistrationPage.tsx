@@ -48,6 +48,9 @@ export default function RegistrationPage() {
   const { data: allParticipants } = useTeamParticipants(id);
 
   const registrationOpen = tournament?.status === 'registration_open';
+  const inProgress = tournament?.status === 'in_progress';
+  // A torneo in corso l'iscrizione è una candidatura da approvare.
+  const canRegister = registrationOpen || inProgress;
 
   const { myTeam, myMembership } = useMemo(() => {
     if (!user || !teams) {
@@ -129,8 +132,8 @@ export default function RegistrationPage() {
         <p className="text-sm text-muted-foreground">{tournament.name}</p>
       </div>
 
-      {/* Nessuna squadra e iscrizioni chiuse */}
-      {!myTeam && !registrationOpen && (
+      {/* Nessuna squadra e iscrizioni chiuse (né aperte né torneo in corso) */}
+      {!myTeam && !canRegister && (
         <EmptyState
           icon={<Users className="h-10 w-10" />}
           title="Iscrizioni chiuse"
@@ -227,14 +230,22 @@ export default function RegistrationPage() {
             </div>
           )}
 
+          {myTeam.pending && (
+            <div className="mb-4 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm text-foreground">
+              Candidatura inviata: in attesa di approvazione dell&apos;amministratore. Una
+              volta accettata, la squadra entrerà nel torneo e verranno aggiunte le sue
+              partite.
+            </div>
+          )}
+
           <RosterEditor
             team={myTeam}
             tournamentId={tournamentId}
-            canManage={!!isCaptain && registrationOpen}
+            canManage={!!isCaptain && (registrationOpen || myTeam.pending)}
             takenProfileIds={takenProfileIds}
           />
 
-          {!registrationOpen && (
+          {!registrationOpen && !myTeam.pending && (
             <p className="mt-3 text-xs text-muted-foreground">
               Le iscrizioni sono chiuse: la rosa non è più modificabile.
             </p>
@@ -306,19 +317,24 @@ export default function RegistrationPage() {
         </Card>
       )}
 
-      {/* Nessuna squadra e iscrizioni aperte: crea o unisciti */}
-      {!myTeam && registrationOpen && (
+      {/* Nessuna squadra: crea (iscrizioni aperte) o candidati (torneo in corso) */}
+      {!myTeam && canRegister && (
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Crea una nuova squadra</CardTitle>
+              <CardTitle>
+                {inProgress ? 'Candidatura squadra' : 'Crea una nuova squadra'}
+              </CardTitle>
             </CardHeader>
             <p className="mb-3 text-sm text-muted-foreground">
-              Diventerai il capitano e potrai gestire la rosa.
+              {inProgress
+                ? "Il torneo è in corso: invii una candidatura. L'admin dovrà accettarla per aggiungere la squadra e le sue partite al calendario."
+                : 'Diventerai il capitano e potrai gestire la rosa.'}
             </p>
-            <TeamRegistrationForm tournamentId={tournamentId} />
+            <TeamRegistrationForm tournamentId={tournamentId} pending={inProgress} />
           </Card>
 
+          {registrationOpen && (
           <Card>
             <CardHeader>
               <CardTitle>Unisciti a una squadra</CardTitle>
@@ -362,6 +378,7 @@ export default function RegistrationPage() {
               </p>
             )}
           </Card>
+          )}
         </div>
       )}
     </section>

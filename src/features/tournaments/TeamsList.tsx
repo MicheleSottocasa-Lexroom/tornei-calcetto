@@ -41,7 +41,10 @@ export function TeamsList({ teams, participantsByTeam }: TeamsListProps) {
                   {count} {count === 1 ? 'partecipante' : 'partecipanti'}
                 </p>
               </div>
-              <Badge tone={meta.tone}>{meta.label}</Badge>
+              <div className="flex shrink-0 items-center gap-2">
+                {team.pending && <Badge tone="warning">In attesa</Badge>}
+                <Badge tone={meta.tone}>{meta.label}</Badge>
+              </div>
             </div>
 
             {count === 0 ? (

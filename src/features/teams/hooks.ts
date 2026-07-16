@@ -53,6 +53,8 @@ export interface CreateTeamInput {
   shirtNumber?: number | null;
   /** Partecipanti (max 3). Il primo è il capitano (l'utente stesso). */
   participants: ParticipantInput[];
+  /** true = candidatura a torneo in corso (in attesa di approvazione admin). */
+  pending?: boolean;
 }
 
 /**
@@ -66,7 +68,7 @@ export function useCreateTeam(tournamentId: string) {
   const { user } = useSession();
 
   return useMutation<Team, unknown, CreateTeamInput>({
-    mutationFn: async ({ name, shirtNumber, participants }) => {
+    mutationFn: async ({ name, shirtNumber, participants, pending }) => {
       if (!user) throw new Error('Devi accedere per creare una squadra.');
 
       const { data: team, error: teamError } = await supabase
@@ -76,6 +78,7 @@ export function useCreateTeam(tournamentId: string) {
           name: name.trim(),
           created_by: user.id,
           captain_id: user.id,
+          pending: pending ?? false,
         } satisfies TeamInsert)
         .select()
         .single();

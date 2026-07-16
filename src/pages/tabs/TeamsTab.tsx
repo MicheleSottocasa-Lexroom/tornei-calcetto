@@ -16,6 +16,7 @@ export default function TeamsTab() {
   const { user } = useSession();
 
   const registrationOpen = tournament?.status === 'registration_open';
+  const inProgress = tournament?.status === 'in_progress';
   const myTeam = (data ?? []).find((t) =>
     t.members.some((m) => m.profile_id === user?.id),
   );
@@ -24,14 +25,16 @@ export default function TeamsTab() {
     <Link to={`/tornei/${id}/iscrizione`} className="block">
       <Button variant="secondary" fullWidth>
         <UserCheck className="h-4 w-4" />
-        Sei iscritto con {myTeam.name} · gestisci
+        {myTeam.pending
+          ? `Candidatura in attesa · ${myTeam.name}`
+          : `Sei iscritto con ${myTeam.name} · gestisci`}
       </Button>
     </Link>
-  ) : registrationOpen ? (
+  ) : registrationOpen || inProgress ? (
     <Link to={`/tornei/${id}/iscrizione`} className="block">
       <Button fullWidth>
         <UserPlus className="h-4 w-4" />
-        Iscrivi la tua squadra
+        {inProgress ? 'Candida la tua squadra' : 'Iscrivi la tua squadra'}
       </Button>
     </Link>
   ) : null;

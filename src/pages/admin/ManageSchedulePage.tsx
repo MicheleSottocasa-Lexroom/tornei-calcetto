@@ -14,6 +14,7 @@ import { MatchScheduler } from '@/features/admin/MatchScheduler';
 import { ManualMatchForm } from '@/features/admin/ManualMatchForm';
 import { FORMAT_LABELS } from '@/features/admin/TournamentForm';
 import {
+  useAcceptCandidacy,
   useAssignTeamToGroup,
   useAutoScheduleMatches,
   useCreateGroup,
@@ -46,6 +47,7 @@ export default function ManageSchedulePage() {
   const assignTeam = useAssignTeamToGroup();
   const removeTeam = useRemoveTeamFromGroup();
   const autoSchedule = useAutoScheduleMatches();
+  const acceptCandidacy = useAcceptCandidacy();
 
   const [error, setError] = useState<string | null>(null);
   const [groupName, setGroupName] = useState('');
@@ -53,7 +55,12 @@ export default function ManageSchedulePage() {
   const [perHour, setPerHour] = useState('2');
 
   const activeTeams = useMemo(
-    () => (teams ?? []).filter((t) => t.status !== 'withdrawn'),
+    () => (teams ?? []).filter((t) => t.status !== 'withdrawn' && !t.pending),
+    [teams],
+  );
+
+  const pendingTeams = useMemo(
+    () => (teams ?? []).filter((t) => t.pending),
     [teams],
   );
 
@@ -127,6 +134,43 @@ export default function ManageSchedulePage() {
           >
             Chiudi
           </button>
+        </Card>
+      )}
+
+      {/* Candidature in attesa (iscrizioni a torneo in corso) */}
+      {pendingTeams.length > 0 && (
+        <Card className="space-y-3 border-warning/40">
+          <p className="text-sm font-semibold text-foreground">Candidature in attesa</p>
+          <ul className="space-y-2">
+            {pendingTeams.map((t) => (
+              <li
+                key={t.id}
+                className="flex items-center justify-between gap-2 rounded-lg border border-border p-2.5"
+              >
+                <span className="min-w-0 truncate text-sm text-foreground">{t.name}</span>
+                <Button
+                  size="sm"
+                  loading={
+                    acceptCandidacy.isPending &&
+                    acceptCandidacy.variables?.teamId === t.id
+                  }
+                  onClick={() => {
+                    clearError();
+                    acceptCandidacy.mutate(
+                      { tournamentId: tournament.id, teamId: t.id },
+                      { onError },
+                    );
+                  }}
+                >
+                  Accetta
+                </Button>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-muted-foreground">
+            Accettando, la squadra entra nel torneo. Per girone all&apos;italiana / campionato
+            vengono aggiunte in coda le sue partite con orari automatici.
+          </p>
         </Card>
       )}
 

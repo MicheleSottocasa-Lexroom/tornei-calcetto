@@ -95,6 +95,7 @@ export interface Database {
           captain_id: string | null;
           seed: number | null;
           status: Database['public']['Enums']['team_status'];
+          pending: boolean;
           created_by: string | null;
           created_at: string;
         };
@@ -105,6 +106,7 @@ export interface Database {
           captain_id?: string | null;
           seed?: number | null;
           status?: Database['public']['Enums']['team_status'];
+          pending?: boolean;
           created_by?: string | null;
           created_at?: string;
         };
@@ -115,6 +117,7 @@ export interface Database {
           captain_id?: string | null;
           seed?: number | null;
           status?: Database['public']['Enums']['team_status'];
+          pending?: boolean;
           created_by?: string | null;
           created_at?: string;
         };
@@ -471,6 +474,12 @@ export interface Database {
           p_tournament_id: string;
           p_start: string;
           p_per_hour?: number;
+        };
+        Returns: undefined;
+      };
+      accept_team_candidacy: {
+        Args: {
+          p_team_id: string;
         };
         Returns: undefined;
       };

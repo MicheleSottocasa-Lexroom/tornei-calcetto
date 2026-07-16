@@ -38,11 +38,14 @@ type FormValues = z.infer<typeof schema>;
 export interface TeamRegistrationFormProps {
   tournamentId: string;
   onCreated?: () => void;
+  /** true = torneo in corso: l'iscrizione è una candidatura da approvare. */
+  pending?: boolean;
 }
 
 export function TeamRegistrationForm({
   tournamentId,
   onCreated,
+  pending = false,
 }: TeamRegistrationFormProps) {
   const { user, profile } = useSession();
   const createTeam = useCreateTeam(tournamentId);
@@ -72,7 +75,7 @@ export function TeamRegistrationForm({
     ].filter((p) => p.full_name.trim().length > 0);
 
     try {
-      await createTeam.mutateAsync({ name: v.name, participants });
+      await createTeam.mutateAsync({ name: v.name, participants, pending });
       reset();
       onCreated?.();
     } catch {
@@ -158,7 +161,7 @@ export function TeamRegistrationForm({
       )}
 
       <Button type="submit" fullWidth loading={createTeam.isPending}>
-        Crea squadra e diventa capitano
+        {pending ? 'Invia candidatura' : 'Crea squadra e diventa capitano'}
       </Button>
     </form>
   );

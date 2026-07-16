@@ -358,6 +358,27 @@ export function useAutoScheduleMatches() {
   });
 }
 
+/**
+ * Accetta la candidatura di una squadra (torneo in corso): la conferma e,
+ * per round_robin/league, aggiunge le sue partite in coda con orari automatici.
+ */
+export function useAcceptCandidacy() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { tournamentId: string; teamId: string }>({
+    mutationFn: async ({ teamId }) => {
+      const { error } = await supabase.rpc('accept_team_candidacy', {
+        p_team_id: teamId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_d, { tournamentId }) => {
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'teams'] });
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'matches'] });
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'standings'] });
+    },
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /* Gironi (groups / group_teams)                                       */
 /* ------------------------------------------------------------------ */
