@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Badge } from '@/components/ui';
+import { Badge, Modal } from '@/components/ui';
 import type { BadgeProps } from '@/components/ui';
 import { cn } from '@/lib/cn';
-import type { Match, MatchStatus, Team } from '@/types';
+import type { Match, MatchStatus, TeamParticipant, TeamWithMembers } from '@/types';
+import { TeamRoster } from './TeamRoster';
 
 const GROUP_LETTERS = 'ABCDEFGH';
 
@@ -27,7 +28,9 @@ const STATUS_META: Record<MatchStatus, { label: string; tone: Tone }> = {
 
 export interface ScheduleListProps {
   matches: Match[];
-  teamsById: Map<string, Team>;
+  teamsById: Map<string, TeamWithMembers>;
+  /** Partecipanti (nomi liberi) per squadra: se presenti, sono la rosa mostrata. */
+  participantsByTeam?: Map<string, TeamParticipant[]>;
 }
 
 interface Section {
@@ -37,9 +40,16 @@ interface Section {
 }
 
 /** Elenco partite raggruppate per giornata / turno, con punteggi e stato live. */
-export function ScheduleList({ matches, teamsById }: ScheduleListProps) {
+export function ScheduleList({
+  matches,
+  teamsById,
+  participantsByTeam,
+}: ScheduleListProps) {
   const groupLabels = useMemo(() => buildGroupLabels(matches), [matches]);
   const sections = useMemo(() => buildSections(matches), [matches]);
+  const [openTeamId, setOpenTeamId] = useState<string | null>(null);
+
+  const openTeam = openTeamId ? teamsById.get(openTeamId) ?? null : null;
 
   return (
     <div className="space-y-6">
@@ -53,11 +63,21 @@ export function ScheduleList({ matches, teamsById }: ScheduleListProps) {
                 match={m}
                 teamsById={teamsById}
                 groupLabels={groupLabels}
+                onTeamClick={setOpenTeamId}
               />
             ))}
           </div>
         </div>
       ))}
+
+      {openTeam && (
+        <Modal open onClose={() => setOpenTeamId(null)} title={openTeam.name}>
+          <TeamRoster
+            team={openTeam}
+            participants={participantsByTeam?.get(openTeam.id)}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
@@ -66,10 +86,12 @@ function MatchRow({
   match,
   teamsById,
   groupLabels,
+  onTeamClick,
 }: {
   match: Match;
-  teamsById: Map<string, Team>;
+  teamsById: Map<string, TeamWithMembers>;
   groupLabels: Map<string, string>;
+  onTeamClick: (teamId: string) => void;
 }) {
   const meta = STATUS_META[match.status];
   const homeName = teamName(match.home_team_id, teamsById);
@@ -99,14 +121,13 @@ function MatchRow({
         </div>
       </div>
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <span
-          className={cn(
-            'truncate text-right text-sm',
-            homeWin ? 'font-bold text-foreground' : 'text-foreground',
-          )}
-        >
-          {homeName}
-        </span>
+        <TeamName
+          id={match.home_team_id}
+          name={homeName}
+          win={homeWin}
+          align="right"
+          onTeamClick={onTeamClick}
+        />
         <div className="flex flex-col items-center">
           {showScore ? (
             <span className="whitespace-nowrap text-base font-bold text-foreground">
@@ -123,14 +144,13 @@ function MatchRow({
             </span>
           )}
         </div>
-        <span
-          className={cn(
-            'truncate text-left text-sm',
-            awayWin ? 'font-bold text-foreground' : 'text-foreground',
-          )}
-        >
-          {awayName}
-        </span>
+        <TeamName
+          id={match.away_team_id}
+          name={awayName}
+          win={awayWin}
+          align="left"
+          onTeamClick={onTeamClick}
+        />
       </div>
       {match.venue && (
         <div className="mt-2 text-center text-xs text-muted-foreground">{match.venue}</div>
@@ -139,7 +159,40 @@ function MatchRow({
   );
 }
 
-function teamName(id: string | null, teamsById: Map<string, Team>): string {
+/** Nome squadra: cliccabile (apre la rosa) quando l'id è definito. */
+function TeamName({
+  id,
+  name,
+  win,
+  align,
+  onTeamClick,
+}: {
+  id: string | null;
+  name: string;
+  win: boolean;
+  align: 'left' | 'right';
+  onTeamClick: (teamId: string) => void;
+}) {
+  const base = cn(
+    'min-w-0 truncate text-sm',
+    align === 'right' ? 'text-right' : 'text-left',
+    win ? 'font-bold text-foreground' : 'text-foreground',
+  );
+  if (!id) {
+    return <span className={cn(base, 'text-muted-foreground')}>{name}</span>;
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => onTeamClick(id)}
+      className={cn(base, 'hover:underline focus:underline focus:outline-none')}
+    >
+      {name}
+    </button>
+  );
+}
+
+function teamName(id: string | null, teamsById: Map<string, TeamWithMembers>): string {
   if (!id) return 'Da definire';
   return teamsById.get(id)?.name ?? 'Squadra';
 }
@@ -147,7 +200,7 @@ function teamName(id: string | null, teamsById: Map<string, Team>): string {
 function formatDateTime(iso: string | null): string {
   if (!iso) return 'Data da definire';
   try {
-    return format(new Date(iso), "EEE d MMM · HH:mm", { locale: it });
+    return format(new Date(iso), 'EEE d MMM · HH:mm', { locale: it });
   } catch {
     return 'Data da definire';
   }
