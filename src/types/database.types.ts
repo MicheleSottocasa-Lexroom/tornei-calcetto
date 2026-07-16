@@ -513,6 +513,7 @@ export interface Database {
         Args: {
           p_tournament_id: string;
           p_only_scheduled?: boolean;
+          p_per_hour?: number;
         };
         Returns: number;
       };

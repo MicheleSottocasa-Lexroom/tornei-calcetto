@@ -447,11 +447,16 @@ export function useRemoveAvailability() {
 /** Genera gli orari riempiendo le finestre (RPC auto_schedule_from_windows). */
 export function useScheduleFromWindows() {
   const qc = useQueryClient();
-  return useMutation<number, Error, { tournamentId: string; onlyScheduled?: boolean }>({
-    mutationFn: async ({ tournamentId, onlyScheduled }) => {
+  return useMutation<
+    number,
+    Error,
+    { tournamentId: string; onlyScheduled?: boolean; perHour?: number }
+  >({
+    mutationFn: async ({ tournamentId, onlyScheduled, perHour }) => {
       const { data, error } = await supabase.rpc('auto_schedule_from_windows', {
         p_tournament_id: tournamentId,
         p_only_scheduled: onlyScheduled ?? true,
+        p_per_hour: perHour ?? 2,
       });
       if (error) throw error;
       return data ?? 0;

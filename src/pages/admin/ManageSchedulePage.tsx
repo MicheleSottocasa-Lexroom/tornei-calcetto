@@ -73,6 +73,7 @@ export default function ManageSchedulePage() {
   const [avDate, setAvDate] = useState('');
   const [avStart, setAvStart] = useState('');
   const [avEnd, setAvEnd] = useState('');
+  const [winPerHour, setWinPerHour] = useState('2');
   // Preserva le partite non "in programma" (giocate/live) quando si rigenera o si
   // riassegnano gli orari. ON di default: sicuro (su torneo nuovo è identico).
   const [onlyScheduled, setOnlyScheduled] = useState(true);
@@ -470,8 +471,8 @@ export default function ManageSchedulePage() {
           </p>
           <p className="text-xs text-muted-foreground">
             Imposta i giorni e le fasce orarie in cui si gioca. La generazione
-            automatica piazza le partite solo dentro queste finestre (30 min l&apos;una,
-            max 2 per ora).
+            automatica piazza le partite solo dentro queste finestre, con la cadenza
+            (partite per ora) che scegli qui sotto.
           </p>
         </div>
 
@@ -567,20 +568,36 @@ export default function ManageSchedulePage() {
         </Button>
 
         {hasMatches && (windows ?? []).length > 0 && (
-          <Button
-            fullWidth
-            loading={scheduleFromWindows.isPending}
-            onClick={() => {
-              clearError();
-              scheduleFromWindows.mutate(
-                { tournamentId: tournament.id, onlyScheduled },
-                { onError },
-              );
-            }}
-          >
-            <CalendarRange className="h-4 w-4" />
-            Genera orari nelle finestre
-          </Button>
+          <div className="space-y-2 border-t border-border pt-3">
+            <FormField label="Partite per ora" htmlFor="win_per_hour">
+              <Input
+                id="win_per_hour"
+                type="number"
+                min={1}
+                max={4}
+                value={winPerHour}
+                onChange={(e) => setWinPerHour(e.target.value)}
+              />
+            </FormField>
+            <Button
+              fullWidth
+              loading={scheduleFromWindows.isPending}
+              onClick={() => {
+                clearError();
+                scheduleFromWindows.mutate(
+                  {
+                    tournamentId: tournament.id,
+                    onlyScheduled,
+                    perHour: Number(winPerHour) || 2,
+                  },
+                  { onError },
+                );
+              }}
+            >
+              <CalendarRange className="h-4 w-4" />
+              Genera orari nelle finestre
+            </Button>
+          </div>
         )}
       </Card>
 
