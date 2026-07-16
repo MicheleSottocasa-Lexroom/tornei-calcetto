@@ -73,6 +73,9 @@ export default function ManageSchedulePage() {
   const [avDate, setAvDate] = useState('');
   const [avStart, setAvStart] = useState('');
   const [avEnd, setAvEnd] = useState('');
+  // Preserva le partite non "in programma" (giocate/live) quando si rigenera o si
+  // riassegnano gli orari. ON di default: sicuro (su torneo nuovo è identico).
+  const [onlyScheduled, setOnlyScheduled] = useState(true);
 
   const activeTeams = useMemo(
     () => (teams ?? []).filter((t) => t.status !== 'withdrawn' && !t.pending),
@@ -194,6 +197,34 @@ export default function ManageSchedulePage() {
         </Card>
       )}
 
+      {/* Opzione: preserva le partite non "in programma" */}
+      {hasMatches && (
+        <Card>
+          <label
+            htmlFor="only_scheduled"
+            className="flex cursor-pointer items-start gap-2.5"
+          >
+            <input
+              id="only_scheduled"
+              type="checkbox"
+              checked={onlyScheduled}
+              onChange={(e) => setOnlyScheduled(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+            />
+            <span className="text-sm">
+              <span className="font-medium text-foreground">
+                Aggiorna solo le partite «in programma»
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Rigenerando il calendario o riassegnando gli orari, le partite live,
+                concluse, a tavolino o annullate restano invariate. Disattiva per
+                riscrivere tutto da zero.
+              </span>
+            </span>
+          </label>
+        </Card>
+      )}
+
       {/* Gestione manuale: aggiunta partita al volo */}
       {manual && (
         <ManualMatchForm
@@ -209,7 +240,10 @@ export default function ManageSchedulePage() {
           <p className="text-sm text-muted-foreground">
             Genera automaticamente tutte le giornate del{' '}
             {format === 'league' ? 'campionato' : 'girone all’italiana'}.
-            {hasMatches && ' Le partite esistenti verranno sostituite.'}
+            {hasMatches &&
+              (onlyScheduled
+                ? ' Le partite già giocate o in corso restano invariate; vengono aggiunte le sfide mancanti.'
+                : ' Tutte le partite esistenti verranno sostituite.')}
           </p>
           <Button
             fullWidth
@@ -219,12 +253,17 @@ export default function ManageSchedulePage() {
               if (
                 hasMatches &&
                 !window.confirm(
-                  'Rigenerare il calendario? Le partite esistenti verranno sostituite.',
+                  onlyScheduled
+                    ? 'Rigenerare il calendario mantenendo le partite già giocate o in corso?'
+                    : 'Rigenerare il calendario? Tutte le partite esistenti verranno sostituite.',
                 )
               )
                 return;
               clearError();
-              generateSchedule.mutate({ tournamentId: tournament.id }, { onError });
+              generateSchedule.mutate(
+                { tournamentId: tournament.id, onlyScheduled },
+                { onError },
+              );
             }}
           >
             <Wand2 className="h-4 w-4" />
@@ -386,7 +425,7 @@ export default function ManageSchedulePage() {
                   onClick={() => {
                     clearError();
                     generateSchedule.mutate(
-                      { tournamentId: tournament.id, groupId: g.id },
+                      { tournamentId: tournament.id, groupId: g.id, onlyScheduled },
                       { onError },
                     );
                   }}
@@ -534,7 +573,7 @@ export default function ManageSchedulePage() {
             onClick={() => {
               clearError();
               scheduleFromWindows.mutate(
-                { tournamentId: tournament.id },
+                { tournamentId: tournament.id, onlyScheduled },
                 { onError },
               );
             }}
@@ -552,7 +591,10 @@ export default function ManageSchedulePage() {
             <p className="text-sm font-semibold text-foreground">Date e orari automatici</p>
             <p className="text-xs text-muted-foreground">
               Assegna gli orari a partire dall&apos;inizio scelto, {Number(perHour) || 2}{' '}
-              partite per ora. Sovrascrive gli orari esistenti.
+              partite per ora.{' '}
+              {onlyScheduled
+                ? 'Aggiorna solo le partite in programma.'
+                : 'Sovrascrive gli orari di tutte le partite.'}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -587,6 +629,7 @@ export default function ManageSchedulePage() {
                   tournamentId: tournament.id,
                   start: new Date(schedStart).toISOString(),
                   perHour: Number(perHour) || 2,
+                  onlyScheduled,
                 },
                 { onError },
               );

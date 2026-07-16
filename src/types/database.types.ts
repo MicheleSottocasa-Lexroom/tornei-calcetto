@@ -453,6 +453,7 @@ export interface Database {
         Args: {
           p_tournament_id: string;
           p_group_id?: string | null;
+          p_only_scheduled?: boolean;
         };
         Returns: undefined;
       };
@@ -498,6 +499,7 @@ export interface Database {
           p_tournament_id: string;
           p_start: string;
           p_per_hour?: number;
+          p_only_scheduled?: boolean;
         };
         Returns: undefined;
       };
@@ -510,6 +512,7 @@ export interface Database {
       auto_schedule_from_windows: {
         Args: {
           p_tournament_id: string;
+          p_only_scheduled?: boolean;
         };
         Returns: number;
       };

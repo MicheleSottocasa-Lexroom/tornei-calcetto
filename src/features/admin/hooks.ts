@@ -289,16 +289,19 @@ export interface GenerateScheduleInput {
   tournamentId: string;
   /** Se valorizzato genera il calendario del singolo girone (groups_playoff). */
   groupId?: string | null;
+  /** Se true, preserva le partite non 'scheduled' e rigenera solo le mancanti. */
+  onlyScheduled?: boolean;
 }
 
 /** Girone all'italiana / campionato (RPC generate_round_robin). */
 export function useGenerateSchedule() {
   const qc = useQueryClient();
   return useMutation<void, Error, GenerateScheduleInput>({
-    mutationFn: async ({ tournamentId, groupId }) => {
+    mutationFn: async ({ tournamentId, groupId, onlyScheduled }) => {
       const { error } = await supabase.rpc('generate_round_robin', {
         p_tournament_id: tournamentId,
         p_group_id: groupId ?? undefined,
+        p_only_scheduled: onlyScheduled ?? false,
       });
       if (error) throw error;
     },
@@ -340,17 +343,20 @@ export interface AutoScheduleInput {
   start: string;
   /** Partite per ora (default 2). */
   perHour?: number;
+  /** Se true, assegna gli orari solo alle partite 'scheduled'. */
+  onlyScheduled?: boolean;
 }
 
 /** Assegna automaticamente date/orari alle partite (RPC auto_schedule_matches). */
 export function useAutoScheduleMatches() {
   const qc = useQueryClient();
   return useMutation<void, Error, AutoScheduleInput>({
-    mutationFn: async ({ tournamentId, start, perHour }) => {
+    mutationFn: async ({ tournamentId, start, perHour, onlyScheduled }) => {
       const { error } = await supabase.rpc('auto_schedule_matches', {
         p_tournament_id: tournamentId,
         p_start: start,
         p_per_hour: perHour ?? 2,
+        p_only_scheduled: onlyScheduled ?? false,
       });
       if (error) throw error;
     },
@@ -441,10 +447,11 @@ export function useRemoveAvailability() {
 /** Genera gli orari riempiendo le finestre (RPC auto_schedule_from_windows). */
 export function useScheduleFromWindows() {
   const qc = useQueryClient();
-  return useMutation<number, Error, { tournamentId: string }>({
-    mutationFn: async ({ tournamentId }) => {
+  return useMutation<number, Error, { tournamentId: string; onlyScheduled?: boolean }>({
+    mutationFn: async ({ tournamentId, onlyScheduled }) => {
       const { data, error } = await supabase.rpc('auto_schedule_from_windows', {
         p_tournament_id: tournamentId,
+        p_only_scheduled: onlyScheduled ?? true,
       });
       if (error) throw error;
       return data ?? 0;
