@@ -1,28 +1,14 @@
--- 0002_views.sql — classifiche e marcatori come viste (security_invoker)
+-- 0011_view_names.sql
+-- Fix: le viste classifica/marcatori non esponevano i nomi attesi dalla UI.
+--   standings   -> aggiunge team_name
+--   top_scorers -> full_name rinominata in player_name + team_id/team_name
+-- create or replace non basta (cambia l'ordine delle colonne): drop + recreate.
 
-create or replace view tournament_team_slots as
-  select g.tournament_id, gt.team_id, g.id as group_id
-  from group_teams gt join groups g on g.id = gt.group_id
-  union all
-  select t.tournament_id, t.id as team_id, null::uuid as group_id
-  from teams t
-  where t.status <> 'withdrawn'
-    and not exists (select 1 from group_teams gt2 where gt2.team_id = t.id);
-alter view tournament_team_slots set (security_invoker = on);
+drop view if exists standings_ranked;
+drop view if exists top_scorers;
+drop view if exists standings;
 
-create or replace view match_team_results as
-  select m.tournament_id, m.group_id, m.home_team_id as team_id, m.home_score as gf, m.away_score as ga
-  from matches m
-  where m.status in ('finished','walkover') and m.stage in ('round_robin','group','league')
-    and m.home_team_id is not null and m.away_team_id is not null
-  union all
-  select m.tournament_id, m.group_id, m.away_team_id, m.away_score, m.home_score
-  from matches m
-  where m.status in ('finished','walkover') and m.stage in ('round_robin','group','league')
-    and m.home_team_id is not null and m.away_team_id is not null;
-alter view match_team_results set (security_invoker = on);
-
-create or replace view standings as
+create view standings as
   select s.tournament_id, s.group_id, s.team_id,
     tt.name as team_name,
     count(r.team_id) as played,
@@ -43,7 +29,7 @@ create or replace view standings as
   group by s.tournament_id, s.group_id, s.team_id, tt.name, t.config;
 alter view standings set (security_invoker = on);
 
-create or replace view standings_ranked as
+create view standings_ranked as
   select st.*, row_number() over (
     partition by st.tournament_id, st.group_id
     order by st.points desc, st.goal_difference desc, st.goals_for desc, st.won desc, st.team_id
@@ -51,7 +37,7 @@ create or replace view standings_ranked as
   from standings st;
 alter view standings_ranked set (security_invoker = on);
 
-create or replace view top_scorers as
+create view top_scorers as
   select e.tournament_id, e.player_id,
     p.full_name as player_name,
     tm.team_id,
