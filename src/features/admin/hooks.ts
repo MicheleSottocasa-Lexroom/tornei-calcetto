@@ -19,6 +19,7 @@ import type {
   MatchStatus,
   Profile,
   Tournament,
+  TournamentAvailability,
   TournamentFormat,
   TournamentStatus,
 } from '@/types';
@@ -376,6 +377,80 @@ export function useAcceptCandidacy() {
       qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'matches'] });
       qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'standings'] });
     },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Finestre di disponibilità oraria                                    */
+/* ------------------------------------------------------------------ */
+
+/** Finestre (giorno + fascia oraria) in cui si può giocare, ordinate nel tempo. */
+export function useAvailability(tournamentId: string | undefined) {
+  return useQuery<TournamentAvailability[]>({
+    queryKey: ['tournament', tournamentId, 'availability'],
+    enabled: !!tournamentId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tournament_availability')
+        .select('*')
+        .eq('tournament_id', tournamentId!)
+        .order('starts_at', { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+/** Aggiunge una finestra di disponibilità (istanti ISO). */
+export function useAddAvailability() {
+  const qc = useQueryClient();
+  return useMutation<
+    void,
+    Error,
+    { tournamentId: string; startsAt: string; endsAt: string }
+  >({
+    mutationFn: async ({ tournamentId, startsAt, endsAt }) => {
+      const { error } = await supabase.from('tournament_availability').insert({
+        tournament_id: tournamentId,
+        starts_at: startsAt,
+        ends_at: endsAt,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_d, { tournamentId }) =>
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'availability'] }),
+  });
+}
+
+/** Rimuove una finestra di disponibilità. */
+export function useRemoveAvailability() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { tournamentId: string; id: string }>({
+    mutationFn: async ({ id }) => {
+      const { error } = await supabase
+        .from('tournament_availability')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, { tournamentId }) =>
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'availability'] }),
+  });
+}
+
+/** Genera gli orari riempiendo le finestre (RPC auto_schedule_from_windows). */
+export function useScheduleFromWindows() {
+  const qc = useQueryClient();
+  return useMutation<number, Error, { tournamentId: string }>({
+    mutationFn: async ({ tournamentId }) => {
+      const { data, error } = await supabase.rpc('auto_schedule_from_windows', {
+        p_tournament_id: tournamentId,
+      });
+      if (error) throw error;
+      return data ?? 0;
+    },
+    onSuccess: (_d, { tournamentId }) =>
+      qc.invalidateQueries({ queryKey: ['tournament', tournamentId, 'matches'] }),
   });
 }
 

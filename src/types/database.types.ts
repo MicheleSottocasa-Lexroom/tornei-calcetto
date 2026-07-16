@@ -189,6 +189,30 @@ export interface Database {
         };
         Relationships: [];
       };
+      tournament_availability: {
+        Row: {
+          id: string;
+          tournament_id: string;
+          starts_at: string;
+          ends_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tournament_id: string;
+          starts_at: string;
+          ends_at: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tournament_id?: string;
+          starts_at?: string;
+          ends_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       matches: {
         Row: {
           id: string;
@@ -482,6 +506,12 @@ export interface Database {
           p_team_id: string;
         };
         Returns: undefined;
+      };
+      auto_schedule_from_windows: {
+        Args: {
+          p_tournament_id: string;
+        };
+        Returns: number;
       };
     };
     Enums: {

@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, CalendarClock, Plus, Trash2, Wand2 } from 'lucide-react';
+import { format as formatDate } from 'date-fns';
+import { it } from 'date-fns/locale';
+import {
+  ArrowLeft,
+  CalendarClock,
+  CalendarRange,
+  Plus,
+  Trash2,
+  Wand2,
+} from 'lucide-react';
 import { useMatches, useTeams, useTournament } from '@/hooks/queries';
 import { useRealtimeTournament } from '@/hooks/useRealtimeTournament';
 import { Badge } from '@/components/ui/Badge';
@@ -15,15 +24,19 @@ import { ManualMatchForm } from '@/features/admin/ManualMatchForm';
 import { FORMAT_LABELS } from '@/features/admin/TournamentForm';
 import {
   useAcceptCandidacy,
+  useAddAvailability,
   useAssignTeamToGroup,
   useAutoScheduleMatches,
+  useAvailability,
   useCreateGroup,
   useDeleteGroup,
   useGenerateBracket,
   useGeneratePlayoff,
   useGenerateSchedule,
   useGroups,
+  useRemoveAvailability,
   useRemoveTeamFromGroup,
+  useScheduleFromWindows,
 } from '@/features/admin/hooks';
 
 function nextGroupName(count: number): string {
@@ -48,11 +61,18 @@ export default function ManageSchedulePage() {
   const removeTeam = useRemoveTeamFromGroup();
   const autoSchedule = useAutoScheduleMatches();
   const acceptCandidacy = useAcceptCandidacy();
+  const { data: windows } = useAvailability(id);
+  const addAvailability = useAddAvailability();
+  const removeAvailability = useRemoveAvailability();
+  const scheduleFromWindows = useScheduleFromWindows();
 
   const [error, setError] = useState<string | null>(null);
   const [groupName, setGroupName] = useState('');
   const [schedStart, setSchedStart] = useState('');
   const [perHour, setPerHour] = useState('2');
+  const [avDate, setAvDate] = useState('');
+  const [avStart, setAvStart] = useState('');
+  const [avEnd, setAvEnd] = useState('');
 
   const activeTeams = useMemo(
     () => (teams ?? []).filter((t) => t.status !== 'withdrawn' && !t.pending),
@@ -402,6 +422,128 @@ export default function ManageSchedulePage() {
           )}
         </>
       )}
+
+      {/* Finestre di disponibilità (giorni/fasce in cui si gioca) */}
+      <Card className="space-y-3">
+        <div>
+          <p className="text-sm font-semibold text-foreground">
+            Finestre di disponibilità
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Imposta i giorni e le fasce orarie in cui si gioca. La generazione
+            automatica piazza le partite solo dentro queste finestre (30 min l&apos;una,
+            max 2 per ora).
+          </p>
+        </div>
+
+        {(windows ?? []).length > 0 ? (
+          <ul className="space-y-1.5">
+            {(windows ?? []).map((w) => (
+              <li
+                key={w.id}
+                className="flex items-center justify-between gap-2 rounded-lg bg-background/60 px-3 py-1.5 text-sm"
+              >
+                <span className="truncate text-foreground">
+                  <span className="capitalize">
+                    {formatDate(new Date(w.starts_at), 'EEE d MMM', { locale: it })}
+                  </span>{' '}
+                  <span className="text-muted-foreground">
+                    · {formatDate(new Date(w.starts_at), 'HH:mm')}–
+                    {formatDate(new Date(w.ends_at), 'HH:mm')}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearError();
+                    removeAvailability.mutate(
+                      { tournamentId: tournament.id, id: w.id },
+                      { onError },
+                    );
+                  }}
+                  className="rounded p-1 text-muted-foreground hover:text-destructive"
+                  aria-label="Rimuovi finestra"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-muted-foreground">Nessuna finestra impostata.</p>
+        )}
+
+        <div className="grid grid-cols-3 gap-2">
+          <FormField label="Giorno" htmlFor="av_date">
+            <Input
+              id="av_date"
+              type="date"
+              value={avDate}
+              onChange={(e) => setAvDate(e.target.value)}
+            />
+          </FormField>
+          <FormField label="Dalle" htmlFor="av_start">
+            <Input
+              id="av_start"
+              type="time"
+              value={avStart}
+              onChange={(e) => setAvStart(e.target.value)}
+            />
+          </FormField>
+          <FormField label="Alle" htmlFor="av_end">
+            <Input
+              id="av_end"
+              type="time"
+              value={avEnd}
+              onChange={(e) => setAvEnd(e.target.value)}
+            />
+          </FormField>
+        </div>
+        <Button
+          variant="secondary"
+          fullWidth
+          loading={addAvailability.isPending}
+          disabled={!avDate || !avStart || !avEnd || avEnd <= avStart}
+          onClick={() => {
+            if (!avDate || !avStart || !avEnd || avEnd <= avStart) return;
+            clearError();
+            addAvailability.mutate(
+              {
+                tournamentId: tournament.id,
+                startsAt: new Date(`${avDate}T${avStart}`).toISOString(),
+                endsAt: new Date(`${avDate}T${avEnd}`).toISOString(),
+              },
+              {
+                onSuccess: () => {
+                  setAvStart('');
+                  setAvEnd('');
+                },
+                onError,
+              },
+            );
+          }}
+        >
+          <Plus className="h-4 w-4" />
+          Aggiungi finestra
+        </Button>
+
+        {hasMatches && (windows ?? []).length > 0 && (
+          <Button
+            fullWidth
+            loading={scheduleFromWindows.isPending}
+            onClick={() => {
+              clearError();
+              scheduleFromWindows.mutate(
+                { tournamentId: tournament.id },
+                { onError },
+              );
+            }}
+          >
+            <CalendarRange className="h-4 w-4" />
+            Genera orari nelle finestre
+          </Button>
+        )}
+      </Card>
 
       {/* Date e orari automatici */}
       {hasMatches && (
