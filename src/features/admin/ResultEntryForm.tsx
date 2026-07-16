@@ -25,6 +25,8 @@ const STATUS_OPTIONS: { value: MatchStatus; label: string }[] = [
   { value: 'scheduled', label: 'In programma' },
   { value: 'live', label: 'In corso' },
   { value: 'finished', label: 'Conclusa' },
+  { value: 'walkover', label: 'Mancata presentazione' },
+  { value: 'cancelled', label: 'Annullata' },
 ];
 
 export interface SaveResultPayload {
@@ -33,6 +35,8 @@ export interface SaveResultPayload {
   away_score: number | null;
   home_penalties: number | null;
   away_penalties: number | null;
+  home_no_show: boolean;
+  away_no_show: boolean;
   events: MatchEventDraft[];
 }
 
@@ -63,11 +67,9 @@ export function ResultEntryForm({
   saving = false,
   onSave,
 }: ResultEntryFormProps) {
-  const [status, setStatus] = useState<MatchStatus>(
-    match.status === 'walkover' || match.status === 'cancelled'
-      ? 'finished'
-      : match.status,
-  );
+  const [status, setStatus] = useState<MatchStatus>(match.status);
+  const [homeNoShow, setHomeNoShow] = useState(match.home_no_show);
+  const [awayNoShow, setAwayNoShow] = useState(match.away_no_show);
   const [homeScore, setHomeScore] = useState(
     match.home_score != null ? String(match.home_score) : '',
   );
@@ -119,6 +121,10 @@ export function ResultEntryForm({
   };
 
   const bothTeamsKnown = !!homeTeam && !!awayTeam;
+  const scored = status === 'scheduled' || status === 'live' || status === 'finished';
+  const isWalkover = status === 'walkover';
+  const isCancelled = status === 'cancelled';
+  const noShowValid = !isWalkover || homeNoShow || awayNoShow;
   const isOwnGoal = newType === 'own_goal';
   const showAssist = newType === 'goal' || newType === 'penalty_goal';
 
@@ -163,68 +169,20 @@ export function ResultEntryForm({
   const submit = () => {
     onSave({
       status,
-      home_score: numOrNull(homeScore),
-      away_score: numOrNull(awayScore),
-      home_penalties: numOrNull(homePen),
-      away_penalties: numOrNull(awayPen),
-      events,
+      home_score: scored ? numOrNull(homeScore) : null,
+      away_score: scored ? numOrNull(awayScore) : null,
+      home_penalties: scored ? numOrNull(homePen) : null,
+      away_penalties: scored ? numOrNull(awayPen) : null,
+      home_no_show: isWalkover ? homeNoShow : false,
+      away_no_show: isWalkover ? awayNoShow : false,
+      events: scored ? events : [],
     });
   };
 
   return (
     <div className="space-y-4">
-      {/* Punteggio */}
+      {/* Stato ed esito */}
       <Card className="space-y-3">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
-          <FormField label={homeTeam?.name ?? 'Casa'} htmlFor="home_score">
-            <Input
-              id="home_score"
-              type="number"
-              min={0}
-              inputMode="numeric"
-              value={homeScore}
-              onChange={(e) => setHomeScore(e.target.value)}
-            />
-          </FormField>
-          <span className="pb-3 text-muted-foreground">-</span>
-          <FormField label={awayTeam?.name ?? 'Ospite'} htmlFor="away_score">
-            <Input
-              id="away_score"
-              type="number"
-              min={0}
-              inputMode="numeric"
-              value={awayScore}
-              onChange={(e) => setAwayScore(e.target.value)}
-            />
-          </FormField>
-        </div>
-
-        <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
-          <FormField label="Rigori casa" htmlFor="home_pen">
-            <Input
-              id="home_pen"
-              type="number"
-              min={0}
-              inputMode="numeric"
-              placeholder="—"
-              value={homePen}
-              onChange={(e) => setHomePen(e.target.value)}
-            />
-          </FormField>
-          <span className="pb-3 text-muted-foreground">-</span>
-          <FormField label="Rigori ospite" htmlFor="away_pen">
-            <Input
-              id="away_pen"
-              type="number"
-              min={0}
-              inputMode="numeric"
-              placeholder="—"
-              value={awayPen}
-              onChange={(e) => setAwayPen(e.target.value)}
-            />
-          </FormField>
-        </div>
-
         <FormField label="Stato" htmlFor="status">
           <Select
             id="status"
@@ -238,9 +196,105 @@ export function ResultEntryForm({
             ))}
           </Select>
         </FormField>
+
+        {scored && (
+          <>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
+              <FormField label={homeTeam?.name ?? 'Casa'} htmlFor="home_score">
+                <Input
+                  id="home_score"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={homeScore}
+                  onChange={(e) => setHomeScore(e.target.value)}
+                />
+              </FormField>
+              <span className="pb-3 text-muted-foreground">-</span>
+              <FormField label={awayTeam?.name ?? 'Ospite'} htmlFor="away_score">
+                <Input
+                  id="away_score"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={awayScore}
+                  onChange={(e) => setAwayScore(e.target.value)}
+                />
+              </FormField>
+            </div>
+
+            <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
+              <FormField label="Rigori casa" htmlFor="home_pen">
+                <Input
+                  id="home_pen"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  placeholder="—"
+                  value={homePen}
+                  onChange={(e) => setHomePen(e.target.value)}
+                />
+              </FormField>
+              <span className="pb-3 text-muted-foreground">-</span>
+              <FormField label="Rigori ospite" htmlFor="away_pen">
+                <Input
+                  id="away_pen"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  placeholder="—"
+                  value={awayPen}
+                  onChange={(e) => setAwayPen(e.target.value)}
+                />
+              </FormField>
+            </div>
+          </>
+        )}
+
+        {isWalkover && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">Chi non si è presentato?</p>
+            <label htmlFor="home_no_show" className="flex cursor-pointer items-center gap-2.5">
+              <input
+                id="home_no_show"
+                type="checkbox"
+                checked={homeNoShow}
+                onChange={(e) => setHomeNoShow(e.target.checked)}
+                className="h-4 w-4 shrink-0 accent-primary"
+              />
+              <span className="text-sm text-foreground">{homeTeam?.name ?? 'Casa'}</span>
+            </label>
+            <label htmlFor="away_no_show" className="flex cursor-pointer items-center gap-2.5">
+              <input
+                id="away_no_show"
+                type="checkbox"
+                checked={awayNoShow}
+                onChange={(e) => setAwayNoShow(e.target.checked)}
+                className="h-4 w-4 shrink-0 accent-primary"
+              />
+              <span className="text-sm text-foreground">{awayTeam?.name ?? 'Ospite'}</span>
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Se manca una sola squadra, vince l’altra a tavolino. Chi non si presenta
+              perde 2 punti in classifica; se mancano entrambe, -2 a entrambe.
+            </p>
+            {!noShowValid && (
+              <p className="text-xs text-destructive">
+                Seleziona almeno una squadra assente.
+              </p>
+            )}
+          </div>
+        )}
+
+        {isCancelled && (
+          <p className="text-xs text-muted-foreground">
+            La partita è annullata: non viene conteggiata in classifica.
+          </p>
+        )}
       </Card>
 
-      {/* Eventi */}
+      {/* Eventi (solo per partite giocate) */}
+      {scored && (
       <Card className="space-y-3">
         <div>
           <p className="text-sm font-semibold text-foreground">Eventi partita</p>
@@ -396,8 +450,15 @@ export function ResultEntryForm({
           </Button>
         </div>
       </Card>
+      )}
 
-      <Button type="button" fullWidth loading={saving} onClick={submit}>
+      <Button
+        type="button"
+        fullWidth
+        loading={saving}
+        disabled={!noShowValid}
+        onClick={submit}
+      >
         Salva risultato
       </Button>
     </div>

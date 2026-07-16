@@ -586,6 +586,9 @@ export interface SaveMatchResultInput {
   away_score: number | null;
   home_penalties: number | null;
   away_penalties: number | null;
+  /** Mancata presentazione (solo per lo stato 'walkover'). */
+  home_no_show: boolean;
+  away_no_show: boolean;
   /** Elenco completo (desiderato) degli eventi della partita. */
   events: MatchEventDraft[];
 }
@@ -609,6 +612,8 @@ export function useSaveMatchResult() {
           away_score: input.away_score,
           home_penalties: input.home_penalties,
           away_penalties: input.away_penalties,
+          home_no_show: input.home_no_show,
+          away_no_show: input.away_no_show,
         })
         .eq('id', input.matchId)
         .select('*')

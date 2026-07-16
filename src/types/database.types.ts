@@ -229,6 +229,8 @@ export interface Database {
           away_score: number | null;
           home_penalties: number | null;
           away_penalties: number | null;
+          home_no_show: boolean;
+          away_no_show: boolean;
           winner_team_id: string | null;
           next_match_id: string | null;
           next_match_slot: number | null;
@@ -256,6 +258,8 @@ export interface Database {
           away_score?: number | null;
           home_penalties?: number | null;
           away_penalties?: number | null;
+          home_no_show?: boolean;
+          away_no_show?: boolean;
           winner_team_id?: string | null;
           next_match_id?: string | null;
           next_match_slot?: number | null;
@@ -283,6 +287,8 @@ export interface Database {
           away_score?: number | null;
           home_penalties?: number | null;
           away_penalties?: number | null;
+          home_no_show?: boolean;
+          away_no_show?: boolean;
           winner_team_id?: string | null;
           next_match_id?: string | null;
           next_match_slot?: number | null;
