@@ -109,7 +109,7 @@ function MatchRow({
   return (
     <div className="rounded-lg border border-border bg-card/40 p-3">
       <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-        <span className="truncate">{formatDateTime(match.scheduled_at)}</span>
+        <span className="truncate">{formatTime(match.scheduled_at)}</span>
         <div className="flex shrink-0 items-center gap-2">
           {groupLabel && <span className="text-muted-foreground">{groupLabel}</span>}
           <Badge tone={meta.tone}>
@@ -197,12 +197,12 @@ function teamName(id: string | null, teamsById: Map<string, TeamWithMembers>): s
   return teamsById.get(id)?.name ?? 'Squadra';
 }
 
-function formatDateTime(iso: string | null): string {
-  if (!iso) return 'Data da definire';
+function formatTime(iso: string | null): string {
+  if (!iso) return 'Orario da definire';
   try {
-    return format(new Date(iso), 'EEE d MMM · HH:mm', { locale: it });
+    return format(new Date(iso), 'HH:mm');
   } catch {
-    return 'Data da definire';
+    return 'Orario da definire';
   }
 }
 
@@ -218,25 +218,26 @@ function buildGroupLabels(matches: Match[]): Map<string, string> {
 }
 
 function buildSections(matches: Match[]): Section[] {
+  // Ordine cronologico (le partite senza data in fondo), poi raggruppa per giorno reale.
   const sorted = [...matches].sort((a, b) => {
+    const ta = a.scheduled_at ? new Date(a.scheduled_at).getTime() : Infinity;
+    const tb = b.scheduled_at ? new Date(b.scheduled_at).getTime() : Infinity;
+    if (ta !== tb) return ta - tb;
     const sa = STAGE_ORDER[a.stage] ?? 9;
     const sb = STAGE_ORDER[b.stage] ?? 9;
     if (sa !== sb) return sa - sb;
     const ra = a.round ?? 0;
     const rb = b.round ?? 0;
     if (ra !== rb) return ra - rb;
-    const pa = a.bracket_position ?? 0;
-    const pb = b.bracket_position ?? 0;
-    if (pa !== pb) return pa - pb;
-    return (a.scheduled_at ?? '').localeCompare(b.scheduled_at ?? '');
+    return (a.bracket_position ?? 0) - (b.bracket_position ?? 0);
   });
 
   const sections: Section[] = [];
   let current: Section | null = null;
   for (const m of sorted) {
-    const { key, label } = sectionMeta(m);
+    const key = dayKey(m.scheduled_at);
     if (!current || current.key !== key) {
-      current = { key, label, matches: [] };
+      current = { key, label: dayLabel(m.scheduled_at), matches: [] };
       sections.push(current);
     }
     current.matches.push(m);
@@ -244,15 +245,23 @@ function buildSections(matches: Match[]): Section[] {
   return sections;
 }
 
-function sectionMeta(m: Match): { key: string; label: string } {
-  if (m.stage === 'knockout') {
-    return {
-      key: `ko-${m.round ?? 0}`,
-      label: m.round_name || `Turno ${m.round ?? ''}`.trim(),
-    };
+/** Chiave giorno (locale) per il raggruppamento; le partite senza data in fondo. */
+function dayKey(iso: string | null): string {
+  if (!iso) return '__none__';
+  try {
+    return format(new Date(iso), 'yyyy-MM-dd');
+  } catch {
+    return '__none__';
   }
-  if (m.round != null) {
-    return { key: `${m.stage}-r${m.round}`, label: `Giornata ${m.round}` };
+}
+
+/** Etichetta del giorno, es. "Lunedì 20 luglio". */
+function dayLabel(iso: string | null): string {
+  if (!iso) return 'Data da definire';
+  try {
+    const s = format(new Date(iso), 'EEEE d MMMM', { locale: it });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  } catch {
+    return 'Data da definire';
   }
-  return { key: `${m.stage}-none`, label: 'Partite' };
 }
