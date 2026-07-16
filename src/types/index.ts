@@ -19,6 +19,8 @@ export type TeamParticipant =
   Database['public']['Tables']['team_participants']['Row'];
 export type TournamentAvailability =
   Database['public']['Tables']['tournament_availability']['Row'];
+export type MatchCheckIn =
+  Database['public']['Tables']['match_check_ins']['Row'];
 export type PushSubscriptionRow =
   Database['public']['Tables']['push_subscriptions']['Row'];
 

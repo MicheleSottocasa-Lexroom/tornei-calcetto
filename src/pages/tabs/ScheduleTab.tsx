@@ -2,13 +2,19 @@ import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { AlertTriangle, CalendarDays } from 'lucide-react';
 import { useMatches, useTeams } from '@/hooks/queries';
-import { useTeamParticipants } from '@/features/teams/hooks';
+import {
+  useCheckInMatch,
+  useMatchCheckIns,
+  useTeamParticipants,
+} from '@/features/teams/hooks';
+import { useSession } from '@/hooks/useSession';
 import { EmptyState, Spinner } from '@/components/ui';
 import { ScheduleList } from '@/features/tournaments/ScheduleList';
 import type { TeamParticipant, TeamWithMembers } from '@/types';
 
 export default function ScheduleTab() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useSession();
   const {
     data: matches,
     isLoading: matchesLoading,
@@ -20,6 +26,8 @@ export default function ScheduleTab() {
     error: teamsError,
   } = useTeams(id);
   const { data: participants } = useTeamParticipants(id);
+  const { data: checkIns } = useMatchCheckIns(id);
+  const checkIn = useCheckInMatch();
 
   const teamsById = useMemo<Map<string, TeamWithMembers>>(
     () => new Map((teams ?? []).map((t) => [t.id, t])),
@@ -35,6 +43,15 @@ export default function ScheduleTab() {
     }
     return map;
   }, [participants]);
+
+  // Insieme "matchId|teamId" dei check-in registrati (già filtrati dalla RLS
+  // alle sole partite dell'utente): la presenza per casa/ospite si ricava dai
+  // team id della partita.
+  const checkedSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of checkIns ?? []) set.add(`${c.match_id}|${c.team_id}`);
+    return set;
+  }, [checkIns]);
 
   if (matchesLoading || teamsLoading) {
     return (
@@ -69,6 +86,10 @@ export default function ScheduleTab() {
       matches={matches}
       teamsById={teamsById}
       participantsByTeam={participantsByTeam}
+      currentUserId={user?.id ?? null}
+      isChecked={(matchId, teamId) => checkedSet.has(`${matchId}|${teamId}`)}
+      onCheckIn={(matchId) => id && checkIn.mutate({ tournamentId: id, matchId })}
+      checkInPendingId={checkIn.isPending ? (checkIn.variables?.matchId ?? null) : null}
     />
   );
 }

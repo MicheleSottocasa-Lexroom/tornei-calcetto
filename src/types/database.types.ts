@@ -213,6 +213,30 @@ export interface Database {
         };
         Relationships: [];
       };
+      match_check_ins: {
+        Row: {
+          match_id: string;
+          team_id: string;
+          tournament_id: string;
+          checked_in_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          match_id: string;
+          team_id: string;
+          tournament_id: string;
+          checked_in_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          match_id?: string;
+          team_id?: string;
+          tournament_id?: string;
+          checked_in_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       matches: {
         Row: {
           id: string;
@@ -522,6 +546,12 @@ export interface Database {
           p_per_hour?: number;
         };
         Returns: number;
+      };
+      check_in_match: {
+        Args: {
+          p_match_id: string;
+        };
+        Returns: string;
       };
     };
     Enums: {

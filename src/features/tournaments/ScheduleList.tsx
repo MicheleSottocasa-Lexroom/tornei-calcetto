@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Badge, Modal } from '@/components/ui';
+import { Badge, Button, Modal } from '@/components/ui';
 import type { BadgeProps } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import type { Match, MatchStatus, TeamParticipant, TeamWithMembers } from '@/types';
@@ -31,6 +31,14 @@ export interface ScheduleListProps {
   teamsById: Map<string, TeamWithMembers>;
   /** Partecipanti (nomi liberi) per squadra: se presenti, sono la rosa mostrata. */
   participantsByTeam?: Map<string, TeamParticipant[]>;
+  /** Utente corrente: abilita il check-in nelle partite in cui gioca. */
+  currentUserId?: string | null;
+  /** Una squadra ha fatto il check-in a una partita? */
+  isChecked?: (matchId: string, teamId: string) => boolean;
+  /** Avvia il check-in della squadra dell'utente per la partita. */
+  onCheckIn?: (matchId: string) => void;
+  /** Id della partita per cui il check-in è in corso (stato di caricamento). */
+  checkInPendingId?: string | null;
 }
 
 interface Section {
@@ -44,6 +52,10 @@ export function ScheduleList({
   matches,
   teamsById,
   participantsByTeam,
+  currentUserId,
+  isChecked,
+  onCheckIn,
+  checkInPendingId,
 }: ScheduleListProps) {
   const groupLabels = useMemo(() => buildGroupLabels(matches), [matches]);
   const sections = useMemo(() => buildSections(matches), [matches]);
@@ -64,6 +76,10 @@ export function ScheduleList({
                 teamsById={teamsById}
                 groupLabels={groupLabels}
                 onTeamClick={setOpenTeamId}
+                currentUserId={currentUserId}
+                isChecked={isChecked}
+                onCheckIn={onCheckIn}
+                checkInPendingId={checkInPendingId}
               />
             ))}
           </div>
@@ -87,15 +103,41 @@ function MatchRow({
   teamsById,
   groupLabels,
   onTeamClick,
+  currentUserId,
+  isChecked,
+  onCheckIn,
+  checkInPendingId,
 }: {
   match: Match;
   teamsById: Map<string, TeamWithMembers>;
   groupLabels: Map<string, string>;
   onTeamClick: (teamId: string) => void;
+  currentUserId?: string | null;
+  isChecked?: (matchId: string, teamId: string) => boolean;
+  onCheckIn?: (matchId: string) => void;
+  checkInPendingId?: string | null;
 }) {
   const meta = STATUS_META[match.status];
   const homeName = teamName(match.home_team_id, teamsById);
   const awayName = teamName(match.away_team_id, teamsById);
+
+  // Squadra dell'utente tra le due sfidanti (per il check-in).
+  const inTeam = (teamId: string | null) =>
+    !!teamId &&
+    !!currentUserId &&
+    (teamsById.get(teamId)?.members.some((m) => m.profile_id === currentUserId) ??
+      false);
+  const mySide: 'home' | 'away' | null = inTeam(match.home_team_id)
+    ? 'home'
+    : inTeam(match.away_team_id)
+      ? 'away'
+      : null;
+  const showCheckIn = match.status === 'live' && mySide != null && !!onCheckIn;
+  const homeChecked =
+    !!match.home_team_id && (isChecked?.(match.id, match.home_team_id) ?? false);
+  const awayChecked =
+    !!match.away_team_id && (isChecked?.(match.id, match.away_team_id) ?? false);
+  const myChecked = mySide === 'home' ? homeChecked : awayChecked;
   const hasScore = match.home_score != null && match.away_score != null;
   const showScore =
     match.status === 'live' ||
@@ -154,6 +196,38 @@ function MatchRow({
       </div>
       {match.venue && (
         <div className="mt-2 text-center text-xs text-muted-foreground">{match.venue}</div>
+      )}
+
+      {showCheckIn && (
+        <div className="mt-2 space-y-1.5 rounded-lg border border-border bg-background/60 p-2">
+          <p className="text-xs font-medium text-foreground">Check-in presenze</p>
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span className="min-w-0 truncate text-foreground">{homeName}</span>
+            <Badge tone={homeChecked ? 'success' : 'default'}>
+              {homeChecked ? 'Presente' : 'In attesa'}
+            </Badge>
+          </div>
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span className="min-w-0 truncate text-foreground">{awayName}</span>
+            <Badge tone={awayChecked ? 'success' : 'default'}>
+              {awayChecked ? 'Presente' : 'In attesa'}
+            </Badge>
+          </div>
+          {myChecked ? (
+            <p className="text-xs text-muted-foreground">
+              Check-in della tua squadra registrato.
+            </p>
+          ) : (
+            <Button
+              size="sm"
+              fullWidth
+              loading={checkInPendingId === match.id}
+              onClick={() => onCheckIn?.(match.id)}
+            >
+              Fai il check-in
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/hooks/useSession';
 import type {
+  MatchCheckIn,
   MemberRole,
   Profile,
   Team,
@@ -480,6 +481,49 @@ export function useTransferCaptaincy(tournamentId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: teamsKey(tournamentId) });
       void queryClient.invalidateQueries({ queryKey: ['my-teams'] });
+    },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Check-in presenze (partite live)                                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Check-in delle squadre per le partite del torneo. La RLS restituisce solo i
+ * check-in delle partite in cui l'utente gioca (o tutte, se admin): quindi il
+ * dato è visibile solo alle squadre sfidanti.
+ */
+export function useMatchCheckIns(tournamentId: string | undefined) {
+  return useQuery<MatchCheckIn[]>({
+    queryKey: ['tournament', tournamentId, 'checkins'],
+    enabled: !!tournamentId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('match_check_ins')
+        .select('*')
+        .eq('tournament_id', tournamentId!);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+/** La squadra dell'utente fa il check-in a una partita live (RPC check_in_match). */
+export function useCheckInMatch() {
+  const queryClient = useQueryClient();
+  return useMutation<string, Error, { tournamentId: string; matchId: string }>({
+    mutationFn: async ({ matchId }) => {
+      const { data, error } = await supabase.rpc('check_in_match', {
+        p_match_id: matchId,
+      });
+      if (error) throw error;
+      return data as string;
+    },
+    onSuccess: (_d, { tournamentId }) => {
+      void queryClient.invalidateQueries({
+        queryKey: ['tournament', tournamentId, 'checkins'],
+      });
     },
   });
 }

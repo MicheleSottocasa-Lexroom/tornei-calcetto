@@ -23,6 +23,9 @@ export function useRealtimeTournament(tournamentId: string | undefined) {
       queryClient.invalidateQueries({
         queryKey: ['tournament', tournamentId, 'scorers'],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['tournament', tournamentId, 'checkins'],
+      });
     };
 
     const channel = supabase
@@ -43,6 +46,16 @@ export function useRealtimeTournament(tournamentId: string | undefined) {
           event: '*',
           schema: 'public',
           table: 'match_events',
+          filter: `tournament_id=eq.${tournamentId}`,
+        },
+        invalidate,
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'match_check_ins',
           filter: `tournament_id=eq.${tournamentId}`,
         },
         invalidate,
