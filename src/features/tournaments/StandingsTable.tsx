@@ -1,10 +1,15 @@
-import { useMemo } from 'react';
-import type { StandingRow } from '@/types';
+import { useMemo, useState } from 'react';
+import { Modal } from '@/components/ui';
+import type { StandingRow, TeamParticipant, TeamWithMembers } from '@/types';
+import { TeamRoster } from './TeamRoster';
 
 const GROUP_LETTERS = 'ABCDEFGH';
 
 export interface StandingsTableProps {
   standings: StandingRow[];
+  /** Se presenti, i nomi diventano cliccabili e aprono la rosa. */
+  teamsById?: Map<string, TeamWithMembers>;
+  participantsByTeam?: Map<string, TeamParticipant[]>;
 }
 
 interface StandingsGroup {
@@ -16,8 +21,23 @@ interface StandingsGroup {
 /**
  * Tabella classifica. Se le righe contengono un `group_id` (formato gironi),
  * viene raggruppata per girone; altrimenti mostra un'unica tabella.
+ * Cliccando sul nome di una squadra (se `teamsById` è fornito) si apre la rosa.
  */
-export function StandingsTable({ standings }: StandingsTableProps) {
+export function StandingsTable({
+  standings,
+  teamsById,
+  participantsByTeam,
+}: StandingsTableProps) {
+  const [openTeamId, setOpenTeamId] = useState<string | null>(null);
+  const openTeam = openTeamId ? teamsById?.get(openTeamId) ?? null : null;
+
+  const onTeamClick =
+    teamsById != null
+      ? (teamId: string) => {
+          if (teamsById.has(teamId)) setOpenTeamId(teamId);
+        }
+      : undefined;
+
   const groups = useMemo<StandingsGroup[]>(() => {
     const hasGroups = standings.some((r) => r.group_id != null);
     if (!hasGroups) {
@@ -50,14 +70,29 @@ export function StandingsTable({ standings }: StandingsTableProps) {
           {g.label && (
             <h3 className="text-sm font-semibold text-primary">{g.label}</h3>
           )}
-          <StandingsGroupTable rows={g.rows} />
+          <StandingsGroupTable rows={g.rows} onTeamClick={onTeamClick} />
         </div>
       ))}
+
+      {openTeam && (
+        <Modal open onClose={() => setOpenTeamId(null)} title={openTeam.name}>
+          <TeamRoster
+            team={openTeam}
+            participants={participantsByTeam?.get(openTeam.id)}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
 
-function StandingsGroupTable({ rows }: { rows: StandingRow[] }) {
+function StandingsGroupTable({
+  rows,
+  onTeamClick,
+}: {
+  rows: StandingRow[];
+  onTeamClick?: (teamId: string) => void;
+}) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full min-w-[480px] border-collapse text-sm">
@@ -99,7 +134,17 @@ function StandingsGroupTable({ rows }: { rows: StandingRow[] }) {
             <tr key={r.team_id} className="border-t border-border">
               <td className="px-2 py-2 text-center text-muted-foreground">{r.position}</td>
               <td className="px-2 py-2 text-left font-medium text-foreground">
-                {r.team_name}
+                {onTeamClick && r.team_id ? (
+                  <button
+                    type="button"
+                    onClick={() => onTeamClick(r.team_id!)}
+                    className="text-left hover:underline focus:underline focus:outline-none"
+                  >
+                    {r.team_name}
+                  </button>
+                ) : (
+                  r.team_name
+                )}
               </td>
               <td className="px-2 py-2 text-center text-muted-foreground">{r.played}</td>
               <td className="px-2 py-2 text-center text-muted-foreground">{r.won}</td>

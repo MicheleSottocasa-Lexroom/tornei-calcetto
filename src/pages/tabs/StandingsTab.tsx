@@ -1,13 +1,33 @@
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { AlertTriangle, ListOrdered } from 'lucide-react';
-import { useStandings, useTournament } from '@/hooks/queries';
+import { useStandings, useTeams, useTournament } from '@/hooks/queries';
+import { useTeamParticipants } from '@/features/teams/hooks';
 import { EmptyState, Spinner } from '@/components/ui';
 import { StandingsTable } from '@/features/tournaments/StandingsTable';
+import type { TeamParticipant, TeamWithMembers } from '@/types';
 
 export default function StandingsTab() {
   const { id } = useParams<{ id: string }>();
   const { data: tournament } = useTournament(id);
   const { data, isLoading, error } = useStandings(id);
+  const { data: teams } = useTeams(id);
+  const { data: participants } = useTeamParticipants(id);
+
+  const teamsById = useMemo<Map<string, TeamWithMembers>>(
+    () => new Map((teams ?? []).map((t) => [t.id, t])),
+    [teams],
+  );
+
+  const participantsByTeam = useMemo(() => {
+    const map = new Map<string, TeamParticipant[]>();
+    for (const p of participants ?? []) {
+      const arr = map.get(p.team_id) ?? [];
+      arr.push(p);
+      map.set(p.team_id, arr);
+    }
+    return map;
+  }, [participants]);
 
   if (isLoading) {
     return (
@@ -42,5 +62,11 @@ export default function StandingsTab() {
     );
   }
 
-  return <StandingsTable standings={data} />;
+  return (
+    <StandingsTable
+      standings={data}
+      teamsById={teamsById}
+      participantsByTeam={participantsByTeam}
+    />
+  );
 }
