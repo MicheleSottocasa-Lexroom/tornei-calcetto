@@ -74,10 +74,10 @@ function MatchRow({
   const meta = STATUS_META[match.status];
   const homeName = teamName(match.home_team_id, teamsById);
   const awayName = teamName(match.away_team_id, teamsById);
+  const hasScore = match.home_score != null && match.away_score != null;
   const showScore =
-    match.status === 'finished' ||
     match.status === 'live' ||
-    match.status === 'walkover';
+    ((match.status === 'finished' || match.status === 'walkover') && hasScore);
   const homeWin = !!match.winner_team_id && match.winner_team_id === match.home_team_id;
   const awayWin = !!match.winner_team_id && match.winner_team_id === match.away_team_id;
   const groupLabel = match.group_id ? groupLabels.get(match.group_id) : null;
