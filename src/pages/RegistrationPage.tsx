@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Pencil, Users } from 'lucide-react';
 import { useTournament, useTeams } from '@/hooks/queries';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -14,6 +15,7 @@ import { RosterEditor } from '@/features/teams/RosterEditor';
 import {
   useJoinTeam,
   useLeaveTeam,
+  useRenameTeam,
   useTeamParticipants,
   useTransferCaptaincy,
   teamErrorMessage,
@@ -39,7 +41,10 @@ export default function RegistrationPage() {
   const joinTeam = useJoinTeam(tournamentId);
   const leaveTeam = useLeaveTeam();
   const transfer = useTransferCaptaincy(tournamentId);
+  const rename = useRenameTeam(tournamentId);
   const [newCaptain, setNewCaptain] = useState('');
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
   const { data: allParticipants } = useTeamParticipants(id);
 
   const registrationOpen = tournament?.status === 'registration_open';
@@ -148,7 +153,58 @@ export default function RegistrationPage() {
             <Badge tone="primary">{isCaptain ? 'Capitano' : 'Giocatore'}</Badge>
           </CardHeader>
 
-          <p className="mb-3 text-lg font-semibold text-foreground">{myTeam.name}</p>
+          {isCaptain && editingName ? (
+            <div className="mb-3 space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  aria-label="Nome squadra"
+                />
+                <Button
+                  size="sm"
+                  loading={rename.isPending}
+                  disabled={!nameDraft.trim() || nameDraft.trim() === myTeam.name}
+                  onClick={() => {
+                    const n = nameDraft.trim();
+                    if (!n || n === myTeam.name) {
+                      setEditingName(false);
+                      return;
+                    }
+                    rename.mutate(
+                      { teamId: myTeam.id, name: n },
+                      { onSuccess: () => setEditingName(false) },
+                    );
+                  }}
+                >
+                  Salva
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingName(false)}>
+                  Annulla
+                </Button>
+              </div>
+              {rename.isError && (
+                <p className="text-sm text-destructive">{teamErrorMessage(rename.error)}</p>
+              )}
+            </div>
+          ) : (
+            <div className="mb-3 flex items-center gap-2">
+              <p className="text-lg font-semibold text-foreground">{myTeam.name}</p>
+              {isCaptain && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNameDraft(myTeam.name);
+                    setEditingName(true);
+                  }}
+                  className="rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                  aria-label="Modifica nome squadra"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
 
           {myParticipants.length > 0 && (
             <div className="mb-4 space-y-2">

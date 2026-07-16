@@ -156,6 +156,30 @@ export function useJoinTeam(tournamentId: string) {
   });
 }
 
+export interface RenameTeamInput {
+  teamId: string;
+  name: string;
+}
+
+/** Il capitano (o admin) rinomina la propria squadra. */
+export function useRenameTeam(tournamentId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, unknown, RenameTeamInput>({
+    mutationFn: async ({ teamId, name }) => {
+      const { error } = await supabase
+        .from('teams')
+        .update({ name: name.trim() })
+        .eq('id', teamId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: teamsKey(tournamentId) });
+      void queryClient.invalidateQueries({ queryKey: ['my-teams'] });
+    },
+  });
+}
+
 export interface AddTeamMemberInput {
   teamId: string;
   profileId: string;
